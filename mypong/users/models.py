@@ -1,4 +1,11 @@
+import base64
 from django.db import models
+
+
+def get_default_avatar(image_path):
+    with open(image_path, 'rb') as f:
+        image_b64 = base64.b64encode(f.read())
+        return base64.decodebytes(image_b64)
 
 
 class User(models.Model):
@@ -13,6 +20,9 @@ class User(models.Model):
     uid = models.CharField(
         max_length=10,
         primary_key=True
+    )
+    avatar = models.BinaryField(
+        default=get_default_avatar('static/avatar.jpg')
     )
     status = models.CharField(
         max_length=2,

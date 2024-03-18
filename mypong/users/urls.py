@@ -1,7 +1,7 @@
-from django.urls import path
+from django.urls import path, include
 
 from . import views
-from .views import UserCreationAPI, UserDetailAPI
+from .views import UserCreationAPI, UserProfileAPI
 
 app_name = 'users'
 
@@ -10,5 +10,5 @@ urlpatterns = [
     path('hello/', views.HelloAPI),
 
     path('create/', UserCreationAPI.as_view()),
-    path('<pk>/', UserDetailAPI.as_view()),
+    path('<pk>/profile/', UserProfileAPI.as_view()),
 ]
