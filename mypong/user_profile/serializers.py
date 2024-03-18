@@ -9,7 +9,7 @@ class BinaryField(serializers.Field):
         return base64.b64encode(value)
 
     def to_internal_value(self, value):
-        return base64.decodebytes(value)
+        return base64.b64decode(value)
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -21,7 +21,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = '__all__'
+        exclude = ['friends']
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
@@ -30,3 +30,4 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['message', 'avatar']
+        read_only_fields = ['uid', 'status', 'wins', 'loses']
