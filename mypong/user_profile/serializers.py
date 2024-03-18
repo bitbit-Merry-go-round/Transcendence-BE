@@ -1,9 +1,19 @@
+import base64
 from rest_framework import serializers
 
 from users.models import User
 
 
+class BinaryField(serializers.Field):
+    def to_representation(self, value):
+        return base64.b64encode(value)
+
+    def to_internal_value(self, value):
+        return base64.decodebytes(value)
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
+    avatar = BinaryField()
     exp = serializers.SerializerMethodField()
 
     def get_exp(self, obj):
@@ -12,3 +22,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    avatar = BinaryField()
+
+    class Meta:
+        model = User
+        fields = ['message', 'avatar']
