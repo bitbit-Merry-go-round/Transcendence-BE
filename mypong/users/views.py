@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .models import User, Friend
-from .serializers import UserInitSerializer, UserDetailSerializer, UserUpdateSerializer, \
+from .serializers import FriendListSerializer, UserInitSerializer, UserDetailSerializer, UserUpdateSerializer, \
     FriendSerializer
 
 
@@ -31,8 +31,12 @@ class UserProfileAPI(generics.RetrieveUpdateAPIView):
 
 
 class FriendListAPI(generics.ListAPIView):
-    queryset = Friend.objects.all()
-    serializer_class = FriendSerializer
+    serializer_class = FriendListSerializer
+
+    def get_queryset(self):
+        from_user = self.kwargs['from_user']
+        queryset = Friend.objects.filter(from_user__exact=from_user)
+        return queryset
 
 
 class FriendCreationAPI(generics.CreateAPIView):
