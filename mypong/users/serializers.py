@@ -20,7 +20,7 @@ class UserInitSerializer(serializers.ModelSerializer):
 
 
 class UserSimpleSerializer(serializers.ModelSerializer):
-    avatar = BinaryField()
+    # avatar = BinaryField()
     exp = serializers.SerializerMethodField()
 
     def get_exp(self, obj):
@@ -28,7 +28,7 @@ class UserSimpleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['uid', 'avatar', 'status', 'exp']
+        fields = ['uid', 'status', 'exp'] #아바타 추가할것
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
@@ -40,7 +40,6 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        exclude = ['friends']
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
@@ -56,3 +55,15 @@ class FriendSerializer(serializers.ModelSerializer):
     class Meta:
         model = Friend
         fields = '__all__'
+
+
+class FriendListSerializer(serializers.ModelSerializer):
+    to_user = UserSimpleSerializer(read_only=True)
+
+    def get_queryset(self, from_user):
+        return Friend.objects.filter(from_user=from_user).values()
+
+    class Meta:
+        model = Friend
+        fields = ['to_user']
+
