@@ -12,7 +12,7 @@ urlpatterns = [
 
     path('create/', UserCreationAPI.as_view()),
     path('<pk>/profile/', UserProfileAPI.as_view()),
-    path('friends/', FriendListAPI.as_view()),
-    path('friends/create/', FriendCreationAPI.as_view()),
-    # path('friends/<str:from_user>/<str:to_user>/', FriendDeleteAPI.as_view()),
+    path('<str:from_user>/friends/', FriendListAPI.as_view()),
+    path('<str:from_user>/friends/', FriendCreationAPI.as_view()),
+    # path('<str:from_user>/friends/<str:to_user>/', FriendDeleteAPI.as_view()),
 ]
