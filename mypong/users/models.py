@@ -9,8 +9,6 @@ def get_default_avatar(image_path):
 
 
 class User(models.Model):
-    friends = models.ManyToManyField("User", blank="True")
-
     STATUS_CHOICES = (
         ('OF', 'Offline'),
         ('ON', 'Online'),
