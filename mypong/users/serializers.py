@@ -28,7 +28,7 @@ class UserSimpleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['uid', 'status', 'exp'] #아바타 추가할것
+        fields = ['uid', 'status', 'exp']  # 아바타 추가할것
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
@@ -63,7 +63,14 @@ class FriendListSerializer(serializers.ModelSerializer):
     def get_queryset(self, from_user):
         return Friend.objects.filter(from_user=from_user).values()
 
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+        user_representation = representation.pop('to_user')
+        for key in user_representation:
+            representation[key] = user_representation[key]
+
+        return representation
+
     class Meta:
         model = Friend
         fields = ['to_user']
-
