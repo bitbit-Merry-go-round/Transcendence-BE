@@ -20,7 +20,7 @@ class UserInitSerializer(serializers.ModelSerializer):
 
 
 class UserSimpleSerializer(serializers.ModelSerializer):
-    # avatar = BinaryField()
+    avatar = BinaryField()
     level = serializers.SerializerMethodField()
 
     def get_level(self, obj):
@@ -28,7 +28,7 @@ class UserSimpleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['uid', 'status', 'level']  # 아바타 추가할것
+        fields = ['uid', 'avatar', 'status', 'level']
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
@@ -52,17 +52,14 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ['uid', 'status', 'wins', 'loses']
 
 
-class FriendSerializer(serializers.ModelSerializer):
+class FriendCreationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Friend
-        fields = '__all__'
+        exclude = ['id']
 
 
 class FriendListSerializer(serializers.ModelSerializer):
     to_user = UserSimpleSerializer(read_only=True)
-
-    def get_queryset(self, from_user):
-        return Friend.objects.filter(from_user=from_user).values()
 
     def to_representation(self, obj):
         representation = super().to_representation(obj)
