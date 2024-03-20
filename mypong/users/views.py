@@ -2,8 +2,9 @@ from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import User
-from .serializers import UserInitSerializer, UserDetailSerializer, UserUpdateSerializer
+from .models import User, Friend
+from .serializers import UserInitSerializer, UserDetailSerializer, UserUpdateSerializer, FriendListSerializer, \
+    FriendSerializer, MultipleFieldLookupMixin
 
 
 @api_view(['GET'])
@@ -27,3 +28,31 @@ class UserProfileAPI(generics.RetrieveUpdateAPIView):
             return UserUpdateSerializer
 
     http_method_names = ['get', 'patch']
+
+
+class FriendListAPI(generics.ListCreateAPIView):
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['from_user'] = self.kwargs['from_user']
+        return context
+
+    def get_queryset(self):
+        from_user = self.kwargs['from_user']
+        queryset = Friend.objects.filter(from_user=from_user)
+        return queryset
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return FriendListSerializer
+        if self.request.method == 'POST':
+            return FriendSerializer
+
+    http_method_names = ['get', 'post']
+
+
+class FriendDeleteAPI(MultipleFieldLookupMixin, generics.DestroyAPIView):
+    queryset = Friend.objects.all()
+    serializer_class = FriendSerializer
+    lookup_fields = ('from_user', 'to_user')
+
+    http_method_names = ['delete']

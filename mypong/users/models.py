@@ -9,8 +9,6 @@ def get_default_avatar(image_path):
 
 
 class User(models.Model):
-    friends = models.ManyToManyField("User", blank="True")
-
     STATUS_CHOICES = (
         ('OF', 'Offline'),
         ('ON', 'Online'),
@@ -44,3 +42,6 @@ class User(models.Model):
 class Friend(models.Model):
     from_user = models.ForeignKey(User, related_name='from_user', on_delete=models.CASCADE)
     to_user = models.ForeignKey(User, related_name='to_user', on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ['from_user', 'to_user']
