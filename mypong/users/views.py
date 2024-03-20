@@ -54,3 +54,5 @@ class FriendDeleteAPI(MultipleFieldLookupMixin, generics.DestroyAPIView):
     queryset = Friend.objects.all()
     serializer_class = FriendSerializer
     lookup_fields = ('from_user', 'to_user')
+
+    http_method_names = ['delete']
