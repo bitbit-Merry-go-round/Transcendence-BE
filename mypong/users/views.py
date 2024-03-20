@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from .models import User, Friend
 from .serializers import UserInitSerializer, UserDetailSerializer, UserUpdateSerializer, FriendListSerializer, \
-    FriendCreationSerializer
+    FriendSerializer, MultipleFieldLookupMixin
 
 
 @api_view(['GET'])
@@ -33,13 +33,19 @@ class UserProfileAPI(generics.RetrieveUpdateAPIView):
 class FriendListAPI(generics.ListCreateAPIView):
     def get_queryset(self):
         from_user = self.kwargs['from_user']
-        queryset = Friend.objects.filter(from_user__exact=from_user)
+        queryset = Friend.objects.filter(from_user=from_user)
         return queryset
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return FriendListSerializer
         if self.request.method == 'POST':
-            return FriendCreationSerializer
+            return FriendSerializer
 
     http_method_names = ['get', 'post']
+
+
+class FriendDeleteAPI(MultipleFieldLookupMixin, generics.DestroyAPIView):
+    queryset = Friend.objects.all()
+    serializer_class = FriendSerializer
+    lookup_fields = ('from_user', 'to_user')
