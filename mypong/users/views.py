@@ -31,6 +31,11 @@ class UserProfileAPI(generics.RetrieveUpdateAPIView):
 
 
 class FriendListAPI(generics.ListCreateAPIView):
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['from_user'] = self.kwargs['from_user']
+        return context
+
     def get_queryset(self):
         from_user = self.kwargs['from_user']
         queryset = Friend.objects.filter(from_user=from_user)

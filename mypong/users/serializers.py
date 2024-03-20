@@ -1,6 +1,7 @@
 import base64
 
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 
 from .models import User, Friend
@@ -57,6 +58,14 @@ class FriendSerializer(serializers.ModelSerializer):
     class Meta:
         model = Friend
         exclude = ['id']
+
+    def validate(self, data):
+        from_user = self.context['from_user']
+        if from_user != data['from_user'].uid:
+            raise ValidationError('from_user does not match.')
+        if from_user == data['to_user'].uid:
+            raise ValidationError('from_user and to_user are identical.')
+        return data
 
 
 class FriendListSerializer(serializers.ModelSerializer):
