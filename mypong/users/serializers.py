@@ -21,25 +21,26 @@ class UserInitSerializer(serializers.ModelSerializer):
 
 class UserSimpleSerializer(serializers.ModelSerializer):
     # avatar = BinaryField()
-    exp = serializers.SerializerMethodField()
+    level = serializers.SerializerMethodField()
 
-    def get_exp(self, obj):
-        return obj.wins * 2 + obj.loses
+    def get_level(self, obj):
+        return (obj.wins * 2 + obj.loses) / 10 + 1
 
     class Meta:
         model = User
-        fields = ['uid', 'status', 'exp']  # 아바타 추가할것
+        fields = ['uid', 'status', 'level']  # 아바타 추가할것
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
     avatar = BinaryField()
-    exp = serializers.SerializerMethodField()
+    level = serializers.SerializerMethodField()
 
-    def get_exp(self, obj):
-        return obj.wins * 2 + obj.loses
+    def get_level(self, obj):
+        return (obj.wins * 2 + obj.loses) / 10 + 1
 
     class Meta:
         model = User
+        fields = ['uid', 'avatar', 'level', 'status', 'message']
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
