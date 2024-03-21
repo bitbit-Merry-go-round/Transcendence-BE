@@ -2,12 +2,12 @@ DOCKER_ID := $(shell docker ps -aq)
 DOCKER_IMAGE_ID := $(shell docker images -q)
 DOCKER_VOLUME := $(shell docker volume ls -q)
 PWD := $(shell pwd)
-FE_VOL_PATH := $(PWD)/srcs/mypong/tools/srcs
+USERS_VOL_PATH := $(PWD)/srcs/mypong/tools/srcs
 
 all:
 # todo 당신이 어느 환경에 있든 볼륨에 연결해 드립니다.
-	sed -i '' 's|^\(FE_DB_VOL_PATH\).*|FE_DB_VOL_PATH=$(FE_DB_VOL_PATH)|' './srcs/.env'
-	sed -i '' 's|^\(FE_VOL_PATH\).*|FE_VOL_PATH=$(FE_VOL_PATH)|' './srcs/.env'
+	sed -i '' 's|^\(USERS_DB_VOL_PATH\).*|USERS_DB_VOL_PATH=$(USERS_DB_VOL_PATH)|' './srcs/.env'
+	sed -i '' 's|^\(USERS_VOL_PATH\).*|USERS_VOL_PATH=$(USERS_VOL_PATH)|' './srcs/.env'
 	docker compose -f srcs/compose.yaml up -d
 
 up:

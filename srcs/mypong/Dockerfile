@@ -7,9 +7,9 @@ ARG DOMAIN=domain
 
 WORKDIR /var/www/django
 
-COPY ./tools/run_frontend.sh /home/run_frontend.sh
+COPY tools/run_mypong.sh /home/run_mypong.sh
 
-RUN chmod 755 /home/run_frontend.sh
+RUN chmod 755 /home/run_mypong.sh
 
 RUN apk update && \
     apk --no-cache add \
@@ -28,9 +28,9 @@ RUN pip install --upgrade pip \
     drf-spectacular \
     django-dotenv
 
-RUN openssl genrsa -out ${SSL_PATH}/${DOMAIN}.key 2048 && \
-    openssl req -new -key ${SSL_PATH}/${DOMAIN}.key -out ${SSL_PATH}/${DOMAIN}.crt \
-    -subj "/C=KR/ST=Seoul/L=Gaepodong/O=42seoul/OU=Cadet/CN=${DOMAIN}" && \
-    openssl x509 -req -days 1000 -in ${SSL_PATH}/${DOMAIN}.crt -signkey ${SSL_PATH}/${DOMAIN}.key -out ${SSL_PATH}/${DOMAIN}.crt
+#RUN openssl genrsa -out ${SSL_PATH}/${DOMAIN}.key 2048 && \
+#    openssl req -new -key ${SSL_PATH}/${DOMAIN}.key -out ${SSL_PATH}/${DOMAIN}.crt \
+#    -subj "/C=KR/ST=Seoul/L=Gaepodong/O=42seoul/OU=Cadet/CN=${DOMAIN}" && \
+#    openssl x509 -req -days 1000 -in ${SSL_PATH}/${DOMAIN}.crt -signkey ${SSL_PATH}/${DOMAIN}.key -out ${SSL_PATH}/${DOMAIN}.crt
 
-ENTRYPOINT ["dumb-init", "--", "/home/run_frontend.sh" ]
+ENTRYPOINT ["dumb-init", "--", "/home/run_mypong.sh" ]

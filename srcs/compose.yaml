@@ -10,33 +10,34 @@ services:
     env_file:
       - .env
     depends_on:
-      - frontend_db
+      - users_db
     ports:
       - "8000:8000"
     volumes:
       - fe_vol:/var/www/django/
     networks:
-      - jeseo_net
+      - pong_net
 
-  frontend_db:
-    container_name: frontend_db
+  users_db:
+    container_name: users_db
     image: postgres:alpine3.18
     restart: always
     environment:
     # todo POSTGRES_DB 연결 안 돼서 User 이름과 동일하게 설정 함.
     # https://hub.docker.com/_/postgres
-      POSTGRES_USER: ${FE_DB_USER}
-      POSTGRES_PASSWORD: ${FE_DB_PW}
+      POSTGRES_USER: ${USERS_DB_USER}
+      POSTGRES_PASSWORD: ${USERS_DB_PW}
+      POSTGRES_DB: ${USERS_DB}
 
     volumes:
       - fe_db_vol:/var/lib/postgresql/data
     expose:
       - "5432"
     networks:
-      - jeseo_net
+      - pong_net
 
 networks:
-  jeseo_net:
+  pong_net:
     driver: bridge
 
 volumes:
@@ -48,4 +49,4 @@ volumes:
     driver_opts:
       o: bind
       type: none
-      device: ${FE_VOL_PATH}
+      device: ${USERS_VOL_PATH}
