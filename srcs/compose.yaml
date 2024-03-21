@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+
+  mypong:
+    container_name: mypong
+    image: django
+    pull_policy: never
+    build: ./mypong
+    env_file:
+      - .env
+    depends_on:
+      - frontend_db
+    ports:
+      - "8000:8000"
+    volumes:
+      - fe_vol:/var/www/django/
+    networks:
+      - jeseo_net
+
+  frontend_db:
+    container_name: frontend_db
+    image: postgres:alpine3.18
+    restart: always
+    environment:
+    # todo POSTGRES_DB 연결 안 돼서 User 이름과 동일하게 설정 함.
+    # https://hub.docker.com/_/postgres
+      POSTGRES_USER: ${FE_DB_USER}
+      POSTGRES_PASSWORD: ${FE_DB_PW}
+
+    volumes:
+      - fe_db_vol:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    networks:
+      - jeseo_net
+
+networks:
+  jeseo_net:
+    driver: bridge
+
+volumes:
+# 볼륨
+  fe_db_vol:
+# 바인드 마운트
+  fe_vol:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${FE_VOL_PATH}
