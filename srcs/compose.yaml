@@ -2,11 +2,11 @@ version: '3'
 
 services:
 
-  mypong:
-    container_name: mypong
+  backend:
+    container_name: backend
     image: django
     pull_policy: never
-    build: ./mypong
+    build: ./backend
     env_file:
       - .env
     depends_on:
@@ -14,7 +14,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - users_vol:/var/www/django/mypong/
+      - users_vol:/var/www/django/backend/
     networks:
       - pong_net
 
