@@ -2,19 +2,20 @@ version: '3'
 
 services:
 
-  mypong:
-    container_name: mypong
+  backend:
+    container_name: backend
     image: django
     pull_policy: never
-    build: ./mypong
+    build: ./backend
     env_file:
       - .env
     depends_on:
-      - users_db
+      users_db:
+        condition: service_healthy
     ports:
       - "8000:8000"
     volumes:
-      - users_vol:/var/www/django/mypong/
+      - users_vol:/var/www/django/backend/
     networks:
       - pong_net
 
@@ -28,13 +29,17 @@ services:
       POSTGRES_USER: ${USERS_DB_USER}
       POSTGRES_PASSWORD: ${USERS_DB_PW}
       POSTGRES_DB: ${USERS_DB_NAME}
-
     volumes:
       - users_db_vol:/var/lib/postgresql/data
     expose:
       - "5432"
     networks:
       - pong_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   pong_net:

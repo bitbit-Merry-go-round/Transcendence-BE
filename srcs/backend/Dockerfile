@@ -5,11 +5,11 @@ RUN mkdir -p /var/www/django
 ARG SSL_PATH=/etc/ssl/private
 ARG DOMAIN=domain
 
-WORKDIR /var/www/django/mypong
+WORKDIR /var/www/django/backend
 
-COPY tools/run_mypong.sh /home/run_mypong.sh
+COPY tools/run_backend.sh /home/run_backend.sh
 
-RUN chmod 755 /home/run_mypong.sh
+RUN chmod 755 /home/run_backend.sh
 
 RUN apk update && \
     apk --no-cache add \
@@ -37,4 +37,4 @@ RUN pip install -r /home/requirements.txt
 #    -subj "/C=KR/ST=Seoul/L=Gaepodong/O=42seoul/OU=Cadet/CN=${DOMAIN}" && \
 #    openssl x509 -req -days 1000 -in ${SSL_PATH}/${DOMAIN}.crt -signkey ${SSL_PATH}/${DOMAIN}.key -out ${SSL_PATH}/${DOMAIN}.crt
 
-ENTRYPOINT ["dumb-init", "--", "/home/run_mypong.sh" ]
+ENTRYPOINT ["dumb-init", "--", "/home/run_backend.sh" ]
