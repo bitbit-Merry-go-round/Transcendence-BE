@@ -5,7 +5,7 @@ RUN mkdir -p /var/www/django
 ARG SSL_PATH=/etc/ssl/private
 ARG DOMAIN=domain
 
-WORKDIR /var/www/django
+WORKDIR /var/www/django/mypong
 
 COPY tools/run_mypong.sh /home/run_mypong.sh
 
@@ -16,17 +16,21 @@ RUN apk update && \
     openssl \
     dumb-init
 
-RUN pip install --upgrade pip \
-    pip install django \
-    django-environ \
-    djangorestframework \
-    djangorestframework-simplejwt \
-    django-sslserver \
-    django-filter \
-    psycopg2-binary \
-    django-extensions \
-    drf-spectacular \
-    django-dotenv
+COPY tools/requirements.txt /home/requirements.txt
+RUN pip install --upgrade pip
+RUN pip install -r /home/requirements.txt
+
+#RUN pip install --upgrade pip \
+#    pip install django \
+#    django-environ \
+#    djangorestframework \
+#    djangorestframework-simplejwt \
+#    django-sslserver \
+#    django-filter \
+#    psycopg2-binary \
+#    django-extensions \
+#    drf-spectacular \
+#    django-dotenv
 
 #RUN openssl genrsa -out ${SSL_PATH}/${DOMAIN}.key 2048 && \
 #    openssl req -new -key ${SSL_PATH}/${DOMAIN}.key -out ${SSL_PATH}/${DOMAIN}.crt \

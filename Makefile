@@ -2,7 +2,7 @@ DOCKER_ID := $(shell docker ps -aq)
 DOCKER_IMAGE_ID := $(shell docker images -q)
 DOCKER_VOLUME := $(shell docker volume ls -q)
 PWD := $(shell pwd)
-USERS_VOL_PATH := $(PWD)/srcs/mypong/tools/srcs
+USERS_VOL_PATH := $(PWD)/srcs/mypong/srcs
 
 all:
 # todo 당신이 어느 환경에 있든 볼륨에 연결해 드립니다.

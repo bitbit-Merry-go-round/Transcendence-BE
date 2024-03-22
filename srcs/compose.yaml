@@ -14,23 +14,23 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - fe_vol:/var/www/django/
+      - users_vol:/var/www/django/mypong/
     networks:
       - pong_net
 
   users_db:
     container_name: users_db
-    image: postgres:alpine3.18
+    image: postgres:14.11-alpine3.18
     restart: always
     environment:
     # todo POSTGRES_DB 연결 안 돼서 User 이름과 동일하게 설정 함.
     # https://hub.docker.com/_/postgres
       POSTGRES_USER: ${USERS_DB_USER}
       POSTGRES_PASSWORD: ${USERS_DB_PW}
-      POSTGRES_DB: ${USERS_DB}
+      POSTGRES_DB: ${USERS_DB_NAME}
 
     volumes:
-      - fe_db_vol:/var/lib/postgresql/data
+      - users_db_vol:/var/lib/postgresql/data
     expose:
       - "5432"
     networks:
@@ -42,9 +42,9 @@ networks:
 
 volumes:
 # 볼륨
-  fe_db_vol:
+  users_db_vol:
 # 바인드 마운트
-  fe_vol:
+  users_vol:
     driver: local
     driver_opts:
       o: bind

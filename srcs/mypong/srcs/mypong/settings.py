@@ -80,11 +80,11 @@ WSGI_APPLICATION = 'mypong.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env("DB_NAME"),
-        'USER': env("DB_USER"),
-        'PASSWORD': env("DB_PASSWORD"),
-        'HOST': env("DB_HOST"),
-        'PORT': env("DB_PORT"),
+        'NAME': env("USERS_DB_NAME"),
+        'USER': env("USERS_DB_USER"),
+        'PASSWORD': env("USERS_DB_PW"),
+        'HOST': env("USERS_DB_HOST"),
+        'PORT': env("USERS_DB_PORT"),
     }
 }
 
