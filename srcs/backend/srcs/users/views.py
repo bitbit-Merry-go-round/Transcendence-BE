@@ -1,10 +1,16 @@
 from rest_framework import generics
 from rest_framework.decorators import api_view
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from .models import User, Friend
-from .serializers import UserInitSerializer, UserDetailSerializer, UserUpdateSerializer, FriendListSerializer, \
-    FriendSerializer, MultipleFieldLookupMixin
+from .serializers import (
+    UserInitSerializer,
+    UserDetailSerializer,
+    UserUpdateSerializer,
+    FriendListSerializer,
+    FriendSerializer
+)
 
 
 @api_view(['GET'])
@@ -48,6 +54,16 @@ class FriendListAPI(generics.ListCreateAPIView):
             return FriendSerializer
 
     http_method_names = ['get', 'post']
+
+
+class MultipleFieldLookupMixin(object):
+    def get_object(self):
+        queryset = self.get_queryset()
+        queryset = self.filter_queryset(queryset)
+        filter = {}
+        for field in self.lookup_fields:
+            filter[field] = self.kwargs[field]
+        return get_object_or_404(queryset, **filter)
 
 
 class FriendDeleteAPI(MultipleFieldLookupMixin, generics.DestroyAPIView):
