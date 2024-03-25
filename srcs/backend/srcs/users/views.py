@@ -1,30 +1,64 @@
 from rest_framework import generics
-from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView, status
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import Token
 
 from .models import User, Friend
 from .serializers import (
-    UserInitSerializer,
     UserDetailSerializer,
     UserUpdateSerializer,
     FriendListSerializer,
-    FriendSerializer
+    FriendDetailSerializer,
+    UserRegisterSerializer,
+    UserLoginSerializer
 )
 
 
-@api_view(['GET'])
-def HelloAPI(request):
-    return Response("Hello!")
+class UserRegisterAPIView(APIView):
+    def post(self, request: Request):
+        serializer = UserRegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            token: Token = TokenObtainPairSerializer.get_token(user)
+            res = Response(
+                {
+                    "user": serializer.data,
+                    "message": "register successs",
+                    "token": {
+                        "access": str(token.access_token),
+                        "refresh": str(token),
+                    },
+                },
+                status=status.HTTP_200_OK,
+            )
+            return res
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserCreationAPI(generics.ListCreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserInitSerializer
-    http_method_names = ['post']
+class UserLoginAPIView(APIView):
+    def post(self, request: Request):
+        token_serializer = TokenObtainPairSerializer(data=request.data)
+        if token_serializer.is_valid():
+            user = token_serializer.user
+            serializer = UserLoginSerializer(user)
+            return Response(
+                {
+                    "user": serializer.data,
+                    "message": "login success",
+                    "token": token_serializer.validated_data,
+                },
+                status=status.HTTP_200_OK,
+            )
+        return Response(token_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserProfileAPI(generics.RetrieveUpdateAPIView):
+class UserProfileAPIView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+
     queryset = User.objects.all()
 
     def get_serializer_class(self):
@@ -37,6 +71,8 @@ class UserProfileAPI(generics.RetrieveUpdateAPIView):
 
 
 class FriendListAPI(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['from_user'] = self.kwargs['from_user']
@@ -51,7 +87,7 @@ class FriendListAPI(generics.ListCreateAPIView):
         if self.request.method == 'GET':
             return FriendListSerializer
         if self.request.method == 'POST':
-            return FriendSerializer
+            return FriendDetailSerializer
 
     http_method_names = ['get', 'post']
 
@@ -67,8 +103,10 @@ class MultipleFieldLookupMixin(object):
 
 
 class FriendDeleteAPI(MultipleFieldLookupMixin, generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+
     queryset = Friend.objects.all()
-    serializer_class = FriendSerializer
+    serializer_class = FriendDetailSerializer
     lookup_fields = ('from_user', 'to_user')
 
     http_method_names = ['delete']

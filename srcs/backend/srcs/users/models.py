@@ -1,4 +1,7 @@
 import base64
+
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
 
@@ -8,7 +11,28 @@ def get_default_avatar(image_path):
         return base64.decodebytes(image_b64)
 
 
-class User(models.Model):
+class UserManager(BaseUserManager):
+    def create_user(self, uid, password=None, **extra_fields):
+        if not uid:
+            raise ValueError("Users must have an UID")
+
+        user = self.model(uid=uid, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, uid, password, **extra_fields):
+        return self.create_user(
+            uid,
+            password=password,
+            is_staff=True,
+            is_superuser=True,
+            status='ON',
+            **extra_fields,
+        )
+
+
+class User(AbstractBaseUser, PermissionsMixin):
     STATUS_CHOICES = (('OF', 'Offline'), ('ON', 'Online'), ('GA', 'Gaming'))
 
     uid = models.CharField(max_length=10, primary_key=True)
@@ -17,6 +41,18 @@ class User(models.Model):
     message = models.TextField(blank=True, default='')
     wins = models.IntegerField(default=0)
     loses = models.IntegerField(default=0)
+
+    is_staff = models.BooleanField(default=False)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = "uid"
+
+    def __str__(self):
+        return self.uid
+
+    class Meta:
+        app_label = "users"
 
 
 class Friend(models.Model):
