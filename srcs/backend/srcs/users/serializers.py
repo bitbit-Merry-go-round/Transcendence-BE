@@ -42,7 +42,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['uid', 'avatar', 'level', 'status', 'message']
+        fields = ['uid', 'avatar', 'level', 'status', 'message', 'wins', 'loses']
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
