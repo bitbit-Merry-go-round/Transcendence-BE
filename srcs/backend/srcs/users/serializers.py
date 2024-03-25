@@ -2,7 +2,6 @@ import base64
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import get_object_or_404
 
 from .models import User, Friend
 
@@ -82,13 +81,3 @@ class FriendListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Friend
         fields = ['to_user']
-
-
-class MultipleFieldLookupMixin(object):
-    def get_object(self):
-        queryset = self.get_queryset()
-        queryset = self.filter_queryset(queryset)
-        filter = {}
-        for field in self.lookup_fields:
-            filter[field] = self.kwargs[field]
-        return get_object_or_404(queryset, **filter)
