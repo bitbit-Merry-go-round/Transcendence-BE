@@ -4,8 +4,13 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from .models import User, Friend
-from .serializers import UserInitSerializer, UserDetailSerializer, UserUpdateSerializer, FriendListSerializer, \
+from .serializers import (
+    UserInitSerializer,
+    UserDetailSerializer,
+    UserUpdateSerializer,
+    FriendListSerializer,
     FriendSerializer
+)
 
 
 @api_view(['GET'])
