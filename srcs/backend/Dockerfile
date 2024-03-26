@@ -5,6 +5,10 @@ RUN mkdir -p /var/www/django
 ARG SSL_PATH=/etc/ssl/private
 ARG DOMAIN=domain
 
+#set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 WORKDIR /var/www/django/backend
 
 COPY tools/run_backend.sh /home/run_backend.sh
@@ -14,7 +18,9 @@ RUN chmod 755 /home/run_backend.sh
 RUN apk update && \
     apk --no-cache add \
     openssl \
-    dumb-init
+    dumb-init \
+    build-base \
+    libffi-dev
 
 COPY tools/requirements.txt /home/requirements.txt
 RUN pip install --upgrade pip

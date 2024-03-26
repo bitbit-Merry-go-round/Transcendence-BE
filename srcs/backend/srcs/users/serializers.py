@@ -9,28 +9,18 @@ from .models import Friend
 User = get_user_model()
 
 
-class UserRegisterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = "__all__"
-        extra_kwargs = {"password": {"write_only": True}}
-
-    def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
-
-
-class UserLoginSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = "__all__"
-
-
 class BinaryField(serializers.Field):
     def to_representation(self, value):
         return base64.b64encode(value)
 
     def to_internal_value(self, value):
         return base64.b64decode(value)
+
+
+class UserLoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = "__all__"
 
 
 class UserSimpleSerializer(serializers.ModelSerializer):

@@ -6,3 +6,6 @@ psycopg2-binary==2.9.9
 djangorestframework==3.15.0
 django-cors-headers==4.3.1
 djangorestframework-simplejwt==5.3.1
+dj-rest-auth==5.0.2
+django-allauth==0.61.1
+requests==2.31.0

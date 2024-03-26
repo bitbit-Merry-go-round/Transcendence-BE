@@ -1,59 +1,103 @@
+from json import JSONDecodeError
+
+import requests
+from allauth.socialaccount.models import SocialAccount
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
+from django.conf import settings
+from django.http import JsonResponse
+from django.shortcuts import redirect
 from rest_framework import generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework.views import APIView, status
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.tokens import Token
+from rest_framework.views import status
 
 from .models import User, Friend
+from .provider import OAuthAdapter
 from .serializers import (
     UserDetailSerializer,
     UserUpdateSerializer,
     FriendListSerializer,
     FriendDetailSerializer,
-    UserRegisterSerializer,
-    UserLoginSerializer
 )
 
-
-class UserRegisterAPIView(APIView):
-    def post(self, request: Request):
-        serializer = UserRegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            token: Token = TokenObtainPairSerializer.get_token(user)
-            res = Response(
-                {
-                    "user": serializer.data,
-                    "message": "register successs",
-                    "token": {
-                        "access": str(token.access_token),
-                        "refresh": str(token),
-                    },
-                },
-                status=status.HTTP_200_OK,
-            )
-            return res
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+OAUTH_CALLBACK_URI = 'http%3A%2F%2F127.0.0.1%3A8000%2Fusers%2F42%2Fcallback'
 
 
-class UserLoginAPIView(APIView):
-    def post(self, request: Request):
-        token_serializer = TokenObtainPairSerializer(data=request.data)
-        if token_serializer.is_valid():
-            user = token_serializer.user
-            serializer = UserLoginSerializer(user)
-            return Response(
-                {
-                    "user": serializer.data,
-                    "message": "login success",
-                    "token": token_serializer.validated_data,
-                },
-                status=status.HTTP_200_OK,
-            )
-        return Response(token_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+def oauth_login(request):
+    client_id = settings.SOCIAL_AUTH_42_CLIENT_ID
+    return redirect(
+        f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={OAUTH_CALLBACK_URI}&response_type=code")
+
+
+def oauth_callback(request):
+    client_id = settings.SOCIAL_AUTH_42_CLIENT_ID
+    client_secret = settings.SOCIAL_AUTH_42_CLIENT_SECRET
+    code = request.GET.get("code")
+
+    # code로 access token 요청
+    token_response = requests.post(
+        f"https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&code={code}&redirect_uri={OAUTH_CALLBACK_URI}")
+    token_response_json = token_response.json()
+
+    # 에러 발생 시 중단
+    error = token_response_json.get("error", None)
+    if error is not None:
+        raise JSONDecodeError(error)
+
+    access_token = token_response_json.get("access_token")
+    print(access_token)
+    # access token으로 42 프로필 요청
+    profile_response = requests.get(
+        "https://api.intra.42.fr/v2/me",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    profile_response_json = profile_response.json()
+    uid = profile_response_json.get("login", None)
+
+    try:
+        # 전달받은 아이디로 등록된 유저가 있는지 탐색
+        user = User.objects.get(uid=uid)
+
+        # FK로 연결되어 있는 socialaccount 테이블에서 해당 아이디의 유저가 있는지 확인
+        social_user = SocialAccount.objects.get(user=user)
+
+        # 이미 제대로 가입된 유저 => 로그인 & 해당 우저의 jwt 발급
+        data = {'access_token': access_token, 'code': code}
+        accept = requests.post(f"http://127.0.0.1:8000/users/42/login/finish/", data=data)
+        accept_status = accept.status_code
+
+        # 뭔가 중간에 문제가 생기면 에러
+        if accept_status != 200:
+            return JsonResponse({'err_msg': 'failed to signin'}, status=accept_status)
+
+        accept_json = accept.json()
+        accept_json.pop('user', None)
+        return JsonResponse(accept_json)
+
+    except User.DoesNotExist:
+        # 전달받은 아이디로 기존에 가입된 유저가 아예 없으면 => 새로 회원가입 & 해당 유저의 jwt 발급
+        data = {'access_token': access_token, 'code': code}
+        accept = requests.post(f"http://127.0.0.1:8000/users/42/login/finish/", data=data)
+        accept_status = accept.status_code
+
+        # 뭔가 중간에 문제가 생기면 에러
+        if accept_status != 200:
+            return JsonResponse({'err_msg': 'failed to signup'}, status=accept_status)
+
+        accept_json = accept.json()
+        accept_json.pop('user', None)
+        return JsonResponse(accept_json)
+
+    except SocialAccount.DoesNotExist:
+        # User는 있는데 SocialAccount가 없을 때
+        return JsonResponse({'err_msg': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OAuthLoginView(SocialLoginView):
+    adapter_class = OAuthAdapter
+    callback_url = OAUTH_CALLBACK_URI
+    client_class = OAuth2Client
 
 
 class UserProfileAPIView(generics.RetrieveUpdateAPIView):

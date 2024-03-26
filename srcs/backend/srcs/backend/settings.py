@@ -42,19 +42,77 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
 
-    # 사용할 앱
+    # 생성한 앱
     'users',
 
     # 설치한 라이브러리
     'rest_framework',
-    "rest_framework_simplejwt",
+    'rest_framework_simplejwt',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
 ]
+
+AUTH_USER_MODEL = "user.User"
+
+# allauth config
+ACCOUNT_ADAPTER = 'users.adapter.AccountAdapter'
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'uid'
+ACCOUNT_USER_MODEL_EMAIL_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_EMAIL_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
+
+ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
+ACCOUNT_AUTHENTICATED_LOGOUT_REDIRECTS = True
+
+SIGNUP_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+SOCIALACCOUNT_ADAPTER = 'users.adapter.SocialAccountAdapter'
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_FORMS = {
+    'disconnect': 'allauth.socialaccount.forms.DisconnectForm',
+    'signup': 'allauth.socialaccount.forms.SignupForm',
+}
+SOCIALACCOUNT_PROVIDERS = {
+    "42": {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        "APPS": [
+            {
+                "client_id": "u-s4t2ud-9c16991b58c036772092c27d7f302fb8e92f7c4635ef6f8e57d97bccbbdbfa2d",
+                "secret": "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",
+            },
+        ],
+    }
+}
+
+# OAuth config
+SOCIAL_AUTH_42_CLIENT_ID = 'u-s4t2ud-9c16991b58c036772092c27d7f302fb8e92f7c4635ef6f8e57d97bccbbdbfa2d'
+SOCIAL_AUTH_42_CLIENT_SECRET = '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'
+
+REST_AUTH = {
+    'TOKEN_MODEL': None,
+    'USE_JWT': True,
+    'JWT_AUTH_HTTPONLY': False,
+    'REGISTER_SERIALIZER': 'dj_rest_auth.registration.serializers.RegisterSerializer',
+}
 
 AUTH_USER_MODEL = "users.User"
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        "dj_rest_auth.jwt_auth.JWTAuthentication",
     )
 }
 
@@ -95,6 +153,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # django-allauth
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -158,9 +217,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr'  # 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'  # 'UST'
 
 USE_I18N = True
 
