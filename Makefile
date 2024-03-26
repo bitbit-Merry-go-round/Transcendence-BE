@@ -30,4 +30,7 @@ fclean:
 django:
 	docker compose -f srcs/compose.yaml run -it django sh
 
+db_init:
+	./db_init.sh
+
 .PHONY: all up down re fclean
