@@ -9,34 +9,14 @@ def get_default_avatar(image_path):
 
 
 class User(models.Model):
-    STATUS_CHOICES = (
-        ('OF', 'Offline'),
-        ('ON', 'Online'),
-        ('GA', 'Gaming')
-    )
+    STATUS_CHOICES = (('OF', 'Offline'), ('ON', 'Online'), ('GA', 'Gaming'))
 
-    uid = models.CharField(
-        max_length=10,
-        primary_key=True
-    )
-    avatar = models.BinaryField(
-        default=get_default_avatar('static/avatar.jpg')
-    )
-    status = models.CharField(
-        max_length=2,
-        choices=STATUS_CHOICES,
-        default='ON'
-    )
-    message = models.TextField(
-        blank=True,
-        default=''
-    )
-    wins = models.IntegerField(
-        default=0
-    )
-    loses = models.IntegerField(
-        default=0
-    )
+    uid = models.CharField(max_length=10, primary_key=True)
+    avatar = models.BinaryField(default=get_default_avatar('static/avatar.jpg'))
+    status = models.CharField(max_length=2, choices=STATUS_CHOICES, default='ON')
+    message = models.TextField(blank=True, default='')
+    wins = models.IntegerField(default=0)
+    loses = models.IntegerField(default=0)
 
 
 class Friend(models.Model):
