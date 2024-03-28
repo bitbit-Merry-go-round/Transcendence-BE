@@ -63,6 +63,10 @@ def fourtytwo_callback(request):
         # FK로 연결되어 있는 socialaccount 테이블에서 해당 아이디의 유저가 있는지 확인
         social_user = SocialAccount.objects.get(user=user)
 
+        # 있는데 구글계정이 아니어도 에러
+        if social_user.provider != 'fourtytwo':
+            return JsonResponse({'err_msg': 'no matching social type'}, status=status.HTTP_400_BAD_REQUEST)
+
         # 이미 제대로 가입된 유저 => 로그인 & 해당 우저의 jwt 발급
         data = {'access_token': access_token, 'code': code}
         accept = requests.post(f"http://127.0.0.1:8000/users/42/login/finish/", data=data)
