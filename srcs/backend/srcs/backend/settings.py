@@ -88,16 +88,16 @@ SOCIALACCOUNT_PROVIDERS = {
         # credentials, or list them here:
         "APPS": [
             {
-                "client_id": "u-s4t2ud-9c16991b58c036772092c27d7f302fb8e92f7c4635ef6f8e57d97bccbbdbfa2d",
-                "secret": "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",
+                "client_id": env("FOURTYTWO_CLIENT_ID"),
+                "secret": env("FOURTYTWO_CLIENT_SECRET"),
             },
         ],
     }
 }
 
 # OAuth config
-SOCIAL_AUTH_FOURTYTWO_CLIENT_ID = 'u-s4t2ud-9c16991b58c036772092c27d7f302fb8e92f7c4635ef6f8e57d97bccbbdbfa2d'
-SOCIAL_AUTH_FOURTYTWO_CLIENT_SECRET = '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'
+SOCIAL_AUTH_FOURTYTWO_CLIENT_ID = env("FOURTYTWO_CLIENT_ID")
+SOCIAL_AUTH_FOURTYTWO_CLIENT_SECRET = env("FOURTYTWO_CLIENT_SECRET")
 
 REST_AUTH = {
     'TOKEN_MODEL': None,

@@ -12,6 +12,7 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /var/www/django/backend
 
 COPY tools/run_backend.sh /home/run_backend.sh
+COPY tools/requirements.txt /home/requirements.txt
 
 RUN chmod 755 /home/run_backend.sh
 
@@ -22,7 +23,6 @@ RUN apk update && \
     build-base \
     libffi-dev
 
-COPY tools/requirements.txt /home/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r /home/requirements.txt
 
