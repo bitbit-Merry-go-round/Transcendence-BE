@@ -1,9 +1,12 @@
 import base64
 
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import User, Friend
+from .models import Friend
+
+User = get_user_model()
 
 
 class BinaryField(serializers.Field):
@@ -14,10 +17,10 @@ class BinaryField(serializers.Field):
         return base64.b64decode(value)
 
 
-class UserInitSerializer(serializers.ModelSerializer):
+class UserLoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = "__all__"
 
 
 class UserSimpleSerializer(serializers.ModelSerializer):
@@ -53,7 +56,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ['uid', 'status', 'wins', 'loses']
 
 
-class FriendSerializer(serializers.ModelSerializer):
+class FriendDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Friend
         exclude = ['id']
