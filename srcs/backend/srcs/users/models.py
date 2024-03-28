@@ -12,12 +12,12 @@ def get_default_avatar(image_path):
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, uid, **extra_fields):
+    def create_user(self, uid, password, **extra_fields):
         if not uid:
             raise ValueError("Users must have an UID")
 
         user = self.model(uid=uid, **extra_fields)
-        user.set_unusable_password()
+        user.set_password(password)
         user.save(using=self._db)
         return user
 
@@ -25,6 +25,7 @@ class UserManager(BaseUserManager):
         return self.create_user(
             uid=uid,
             password=password,
+            is_staff=True,
             is_superuser=True,
             **extra_fields
         )
@@ -39,6 +40,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     message = models.TextField(blank=True, default='')
     wins = models.IntegerField(default=0)
     loses = models.IntegerField(default=0)
+    is_staff = models.BooleanField(default=False)
+
+    password = models.CharField(null=True)
 
     objects = UserManager()
 

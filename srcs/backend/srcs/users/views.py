@@ -12,8 +12,9 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import status
 
+from fourtytwo.views import FourtytwoOAuth2Adapter
+
 from .models import User, Friend
-from .provider import OAuthAdapter
 from .serializers import (
     UserDetailSerializer,
     UserUpdateSerializer,
@@ -21,23 +22,23 @@ from .serializers import (
     FriendDetailSerializer,
 )
 
-OAUTH_CALLBACK_URI = 'http%3A%2F%2F127.0.0.1%3A8000%2Fusers%2F42%2Fcallback'
+FOURTYTWO_CALLBACK_URI = 'http%3A%2F%2F127.0.0.1%3A8000%2Fusers%2F42%2Fcallback'
 
 
-def oauth_login(request):
-    client_id = settings.SOCIAL_AUTH_42_CLIENT_ID
+def fourtytwo_login(request):
+    client_id = settings.SOCIAL_AUTH_FOURTYTWO_CLIENT_ID
     return redirect(
-        f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={OAUTH_CALLBACK_URI}&response_type=code")
+        f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={FOURTYTWO_CALLBACK_URI}&response_type=code")
 
 
-def oauth_callback(request):
-    client_id = settings.SOCIAL_AUTH_42_CLIENT_ID
-    client_secret = settings.SOCIAL_AUTH_42_CLIENT_SECRET
+def fourtytwo_callback(request):
+    client_id = settings.SOCIAL_AUTH_FOURTYTWO_CLIENT_ID
+    client_secret = settings.SOCIAL_AUTH_FOURTYTWO_CLIENT_SECRET
     code = request.GET.get("code")
 
     # code로 access token 요청
     token_response = requests.post(
-        f"https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&code={code}&redirect_uri={OAUTH_CALLBACK_URI}")
+        f"https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&code={code}&redirect_uri={FOURTYTWO_CALLBACK_URI}")
     token_response_json = token_response.json()
 
     # 에러 발생 시 중단
@@ -94,9 +95,9 @@ def oauth_callback(request):
         return JsonResponse({'err_msg': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class OAuthLoginView(SocialLoginView):
-    adapter_class = OAuthAdapter
-    callback_url = OAUTH_CALLBACK_URI
+class FourtytwoLoginView(SocialLoginView):
+    adapter_class = FourtytwoOAuth2Adapter
+    callback_url = FOURTYTWO_CALLBACK_URI
     client_class = OAuth2Client
 
 
