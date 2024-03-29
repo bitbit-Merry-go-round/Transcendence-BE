@@ -105,6 +105,21 @@ class FourtytwoLoginView(SocialLoginView):
     client_class = OAuth2Client
 
 
+class UserSearchAPIView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+
+    queryset = User.objects.all()
+    serializer_class = UserDetailSerializer
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        query = self.request.query_params
+        user = get_object_or_404(queryset, uid=query.get('search'))
+        return user
+
+    http_method_names = ['get', 'options']
+
+
 class UserProfileAPIView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
@@ -159,18 +174,3 @@ class FriendDeleteAPIView(MultipleFieldLookupMixin, generics.DestroyAPIView):
     lookup_fields = ('from_user', 'to_user')
 
     http_method_names = ['delete', 'options']
-
-
-class UserSearchAPIView(generics.RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
-
-    queryset = User.objects.all()
-    serializer_class = UserDetailSerializer
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        query = self.request.query_params
-        user = get_object_or_404(queryset, uid=query.get('search'))
-        return user
-
-    http_method_names = ['get', 'options']
