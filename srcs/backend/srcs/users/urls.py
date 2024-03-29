@@ -3,8 +3,9 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from .views import (
     UserProfileAPIView,
-    FriendListAPI,
-    FriendDeleteAPI,
+    FriendListAPIView,
+    FriendDeleteAPIView,
+    UserSearchAPIView,
     fourtytwo_login,
     fourtytwo_callback,
     FourtytwoLoginView,
@@ -18,6 +19,7 @@ urlpatterns = [
     path('42/login/finish/', FourtytwoLoginView.as_view(), name='42_login_to_django'),
 
     path('<pk>/profile/', UserProfileAPIView.as_view()),
-    path('<str:from_user>/friends/', FriendListAPI.as_view()),
-    path('<str:from_user>/friends/<str:to_user>/', FriendDeleteAPI.as_view()),
+    path('<str:from_user>/friends/', FriendListAPIView.as_view()),
+    path('<str:from_user>/friends/<str:to_user>/', FriendDeleteAPIView.as_view()),
+    path('search/', UserSearchAPIView.as_view()),
 ]

@@ -16,6 +16,7 @@ from fourtytwo.views import FourtytwoOAuth2Adapter
 
 from .models import User, Friend
 from .serializers import (
+    UserSimpleSerializer,
     UserDetailSerializer,
     UserUpdateSerializer,
     FriendListSerializer,
@@ -119,7 +120,7 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
     http_method_names = ['get', 'patch', 'options']
 
 
-class FriendListAPI(generics.ListCreateAPIView):
+class FriendListAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_serializer_context(self):
@@ -151,7 +152,7 @@ class MultipleFieldLookupMixin(object):
         return get_object_or_404(queryset, **filter)
 
 
-class FriendDeleteAPI(MultipleFieldLookupMixin, generics.DestroyAPIView):
+class FriendDeleteAPIView(MultipleFieldLookupMixin, generics.DestroyAPIView):
     permission_classes = [IsAuthenticated]
 
     queryset = Friend.objects.all()
@@ -159,3 +160,18 @@ class FriendDeleteAPI(MultipleFieldLookupMixin, generics.DestroyAPIView):
     lookup_fields = ('from_user', 'to_user')
 
     http_method_names = ['delete', 'options']
+
+
+class UserSearchAPIView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+
+    queryset = User.objects.all()
+    serializer_class = UserSimpleSerializer
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        query = self.request.query_params
+        user = get_object_or_404(queryset, uid=query.get('search'))
+        return user
+
+    http_method_names = ['get', 'options']
