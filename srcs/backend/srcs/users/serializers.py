@@ -38,13 +38,18 @@ class UserSimpleSerializer(serializers.ModelSerializer):
 class UserDetailSerializer(serializers.ModelSerializer):
     avatar = BinaryField()
     level = serializers.SerializerMethodField()
+    is_me = serializers.SerializerMethodField()
 
     def get_level(self, obj):
         return (obj.wins * 2 + obj.loses) / 10 + 1
 
+    def get_is_me(self, obj):
+        user = self.context['user']
+        return obj.uid == user.uid
+
     class Meta:
         model = User
-        fields = ['uid', 'avatar', 'level', 'status', 'message', 'wins', 'loses']
+        fields = ['uid', 'avatar', 'level', 'status', 'message', 'wins', 'loses', 'is_me']
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
