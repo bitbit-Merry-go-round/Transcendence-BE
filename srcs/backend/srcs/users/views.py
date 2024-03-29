@@ -48,7 +48,7 @@ def fourtytwo_callback(request):
         raise JSONDecodeError(error)
 
     access_token = token_response_json.get("access_token")
-    print(access_token)
+
     # access token으로 42 프로필 요청
     profile_response = requests.get(
         "https://api.intra.42.fr/v2/me",
