@@ -116,7 +116,7 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
         if self.request.method == 'PATCH':
             return UserUpdateSerializer
 
-    http_method_names = ['get', 'patch']
+    http_method_names = ['get', 'patch', 'options']
 
 
 class FriendListAPI(generics.ListCreateAPIView):
@@ -138,7 +138,7 @@ class FriendListAPI(generics.ListCreateAPIView):
         if self.request.method == 'POST':
             return FriendDetailSerializer
 
-    http_method_names = ['get', 'post']
+    http_method_names = ['get', 'post', 'options']
 
 
 class MultipleFieldLookupMixin(object):
@@ -158,4 +158,4 @@ class FriendDeleteAPI(MultipleFieldLookupMixin, generics.DestroyAPIView):
     serializer_class = FriendDetailSerializer
     lookup_fields = ('from_user', 'to_user')
 
-    http_method_names = ['delete']
+    http_method_names = ['delete', 'options']
