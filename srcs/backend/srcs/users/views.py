@@ -16,7 +16,6 @@ from fourtytwo.views import FourtytwoOAuth2Adapter
 
 from .models import User, Friend
 from .serializers import (
-    UserSimpleSerializer,
     UserDetailSerializer,
     UserUpdateSerializer,
     FriendListSerializer,
@@ -166,7 +165,7 @@ class UserSearchAPIView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     queryset = User.objects.all()
-    serializer_class = UserSimpleSerializer
+    serializer_class = UserDetailSerializer
 
     def get_object(self):
         queryset = self.get_queryset()
