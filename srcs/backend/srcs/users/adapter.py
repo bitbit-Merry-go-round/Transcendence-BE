@@ -21,7 +21,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         user = sociallogin.user
         user_username(user, username or "")
         user_email(user, valid_email_or_none(email) or "")
-        user_field(user, "uid", sociallogin.account.uid)
+        user_field(user, "username", sociallogin.account.uid)
         return user
 
     def save_user(self, request, sociallogin, form=None):

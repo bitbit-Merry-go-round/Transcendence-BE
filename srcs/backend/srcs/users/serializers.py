@@ -32,7 +32,7 @@ class UserSimpleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['uid', 'avatar', 'level', 'status']
+        fields = ['username', 'avatar', 'level', 'status']
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
@@ -46,11 +46,11 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     def get_is_me(self, obj):
         user = self.context['user']
-        return user.uid == obj.uid
+        return user.pk == obj.pk
 
     def get_is_friend(self, obj):
         user = self.context['user']
-        obj = Friend.objects.filter(from_user=user.uid, to_user=obj.uid).first()
+        obj = Friend.objects.filter(from_user=user.pk, to_user=obj.pk).first()
         if obj is None:
             return False
         else:
@@ -58,7 +58,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['uid', 'avatar', 'level', 'status', 'message', 'wins', 'loses', 'is_me', 'is_friend']
+        fields = ['username', 'avatar', 'level', 'status', 'message', 'wins', 'loses', 'is_me', 'is_friend']
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
@@ -67,7 +67,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['message', 'avatar']
-        read_only_fields = ['uid', 'status', 'wins', 'loses']
+        read_only_fields = ['username', 'status', 'wins', 'loses']
 
 
 class FriendDetailSerializer(serializers.ModelSerializer):
@@ -77,9 +77,9 @@ class FriendDetailSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         from_user = self.context['from_user']
-        if from_user != data['from_user'].uid:
+        if from_user != data['from_user'].username:
             raise ValidationError('from_user does not match.')
-        if from_user == data['to_user'].uid:
+        if from_user == data['to_user'].username:
             raise ValidationError('from_user and to_user are identical.')
         return data
 

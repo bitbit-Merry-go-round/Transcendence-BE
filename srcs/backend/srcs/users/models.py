@@ -12,18 +12,18 @@ def get_default_avatar(image_path):
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, uid, password, **extra_fields):
-        if not uid:
-            raise ValueError("Users must have an UID")
+    def create_user(self, username, password, **extra_fields):
+        if not username:
+            raise ValueError("Users must have an username")
 
-        user = self.model(uid=uid, **extra_fields)
+        user = self.model(username=username, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, uid, password, **extra_fields):
+    def create_superuser(self, username, password, **extra_fields):
         return self.create_user(
-            uid=uid,
+            username=username,
             password=password,
             is_staff=True,
             is_superuser=True,
@@ -34,7 +34,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     STATUS_CHOICES = (('OF', 'Offline'), ('ON', 'Online'), ('GA', 'Gaming'))
 
-    uid = models.CharField(max_length=10, primary_key=True)
+    username = models.CharField(max_length=10, unique=True)
     avatar = models.BinaryField(default=get_default_avatar('static/avatar.jpg'))
     status = models.CharField(max_length=2, choices=STATUS_CHOICES, default='ON')
     message = models.TextField(blank=True, default='')
@@ -46,10 +46,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = "uid"
+    USERNAME_FIELD = "username"
 
     def __str__(self):
-        return self.uid
+        return self.username
 
     class Meta:
         app_label = "users"
