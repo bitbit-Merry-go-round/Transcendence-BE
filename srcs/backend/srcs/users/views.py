@@ -111,6 +111,12 @@ class UserSearchAPIView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserDetailSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        query = self.request.query_params
+        context['user'] = User.objects.filter(username=query.get('search')).first()
+        return context
+
     def get_object(self):
         queryset = self.get_queryset()
         query = self.request.query_params
@@ -126,7 +132,6 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['user'] = self.request.user
-        context['username'] = self.kwargs['username']
         return context
 
     def get_object(self):
