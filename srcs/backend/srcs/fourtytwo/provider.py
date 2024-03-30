@@ -4,7 +4,7 @@ from allauth.socialaccount.providers.oauth2.provider import OAuth2Provider
 
 
 class FourtytwoAccount(ProviderAccount):
-    def get_uid(self):
+    def get_username(self):
         return self.account.extra_data.get('login')
 
     def get_avatar_url(self):
@@ -24,8 +24,8 @@ class FourtytwoProvider(OAuth2Provider):
         return str(data['login'])
 
     def extract_common_fields(self, data):
-        uid = data.get("login")
-        return dict(uid=uid)
+        username = data.get("login")
+        return dict(username=username)
 
 
 providers.registry.register(FourtytwoProvider)

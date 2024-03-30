@@ -57,12 +57,10 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
 ]
 
-AUTH_USER_MODEL = "user.User"
-
 # allauth config
 ACCOUNT_ADAPTER = 'users.adapter.AccountAdapter'
 
-ACCOUNT_USER_MODEL_USERNAME_FIELD = 'uid'
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
 ACCOUNT_USER_MODEL_EMAIL_FIELD = None
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_EMAIL_REQUIRED = False
@@ -133,7 +131,7 @@ SIMPLE_JWT = {
     "LEEWAY": 0,
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
-    "USER_ID_FIELD": "uid",
+    "USER_ID_FIELD": "username",
     "USER_ID_CLAIM": "user_id",
     "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),

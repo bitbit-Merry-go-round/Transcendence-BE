@@ -54,11 +54,11 @@ def fourtytwo_callback(request):
         headers={"Authorization": f"Bearer {access_token}"},
     )
     profile_response_json = profile_response.json()
-    uid = profile_response_json.get("login", None)
+    username = profile_response_json.get("login", None)
 
     try:
         # 전달받은 아이디로 등록된 유저가 있는지 탐색
-        user = User.objects.get(uid=uid)
+        user = User.objects.get(username=username)
 
         # FK로 연결되어 있는 socialaccount 테이블에서 해당 아이디의 유저가 있는지 확인
         social_user = SocialAccount.objects.get(user=user)
@@ -111,10 +111,16 @@ class UserSearchAPIView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserDetailSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        query = self.request.query_params
+        context['user'] = User.objects.filter(username=query.get('search')).first()
+        return context
+
     def get_object(self):
         queryset = self.get_queryset()
         query = self.request.query_params
-        user = get_object_or_404(queryset, uid=query.get('search'))
+        user = get_object_or_404(queryset, username=query.get('search'))
         return user
 
     http_method_names = ['get', 'options']
@@ -123,12 +129,15 @@ class UserSearchAPIView(generics.RetrieveAPIView):
 class UserProfileAPIView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
-    queryset = User.objects.all()
-
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['user'] = self.request.user
         return context
+
+    def get_object(self):
+        username = self.kwargs['username']
+        user = User.objects.filter(username=username).first()
+        return user
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -149,7 +158,8 @@ class FriendListAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         from_user = self.kwargs['from_user']
-        queryset = Friend.objects.filter(from_user=from_user)
+        user = User.objects.filter(username=from_user).first()
+        queryset = Friend.objects.filter(from_user=user)
         return queryset
 
     def get_serializer_class(self):
@@ -167,7 +177,9 @@ class MultipleFieldLookupMixin(object):
         queryset = self.filter_queryset(queryset)
         filter = {}
         for field in self.lookup_fields:
-            filter[field] = self.kwargs[field]
+            username = self.kwargs[field]
+            user = User.objects.filter(username=username).first()
+            filter[field] = user.pk
         return get_object_or_404(queryset, **filter)
 
 
