@@ -38,13 +38,27 @@ class UserSimpleSerializer(serializers.ModelSerializer):
 class UserDetailSerializer(serializers.ModelSerializer):
     avatar = BinaryField()
     level = serializers.SerializerMethodField()
+    is_me = serializers.SerializerMethodField()
+    is_friend = serializers.SerializerMethodField()
 
     def get_level(self, obj):
         return (obj.wins * 2 + obj.loses) / 10 + 1
 
+    def get_is_me(self, obj):
+        user = self.context['user']
+        return user.uid == obj.uid
+
+    def get_is_friend(self, obj):
+        user = self.context['user']
+        obj = Friend.objects.filter(from_user=user.uid, to_user=obj.uid).first()
+        if obj is None:
+            return False
+        else:
+            return True
+
     class Meta:
         model = User
-        fields = ['uid', 'avatar', 'level', 'status', 'message', 'wins', 'loses']
+        fields = ['uid', 'avatar', 'level', 'status', 'message', 'wins', 'loses', 'is_me', 'is_friend']
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):

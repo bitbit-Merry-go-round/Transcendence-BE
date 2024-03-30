@@ -125,6 +125,11 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
 
     queryset = User.objects.all()
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['user'] = self.request.user
+        return context
+
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return UserDetailSerializer
