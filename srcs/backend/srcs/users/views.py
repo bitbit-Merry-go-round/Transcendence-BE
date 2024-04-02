@@ -7,6 +7,7 @@ from rest_framework import generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import status
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User, Friend
@@ -76,6 +77,7 @@ def fourtytwo_callback(request):
 
 class UserSearchAPIView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     queryset = User.objects.all()
     serializer_class = UserDetailSerializer
@@ -97,6 +99,9 @@ class UserSearchAPIView(generics.RetrieveAPIView):
 
 class UserProfileAPIView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    queryset = User.objects.all()
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -119,6 +124,7 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
 
 class FriendListAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -154,6 +160,7 @@ class MultipleFieldLookupMixin(object):
 
 class FriendDeleteAPIView(MultipleFieldLookupMixin, generics.DestroyAPIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     queryset = Friend.objects.all()
     serializer_class = FriendDetailSerializer
