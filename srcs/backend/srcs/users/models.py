@@ -17,7 +17,7 @@ class UserManager(BaseUserManager):
             raise ValueError("Users must have an username")
 
         user = self.model(username=username, **extra_fields)
-        user.set_password(password)
+        user.set_unusable_password()
         user.save(using=self._db)
         return user
 
@@ -32,11 +32,11 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    STATUS_CHOICES = (('OF', 'Offline'), ('ON', 'Online'), ('GA', 'Gaming'))
+    STATUS_CHOICES = (('OFFLINE', 'Offline'), ('ONLINE', 'Online'), ('GAMING', 'Gaming'))
 
     username = models.CharField(max_length=10, unique=True)
     avatar = models.BinaryField(default=get_default_avatar('static/avatar.jpg'))
-    status = models.CharField(max_length=2, choices=STATUS_CHOICES, default='ON')
+    status = models.CharField(max_length=7, choices=STATUS_CHOICES, default='ONLINE')
     message = models.TextField(blank=True, default='')
     wins = models.IntegerField(default=0)
     loses = models.IntegerField(default=0)

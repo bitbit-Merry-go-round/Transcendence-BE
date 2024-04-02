@@ -44,65 +44,15 @@ INSTALLED_APPS = [
 
     # 생성한 앱
     'users',
-    'fourtytwo',
 
     # 설치한 라이브러리
     'rest_framework',
     'rest_framework_simplejwt',
-    'dj_rest_auth',
-    'dj_rest_auth.registration',
-
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
 ]
 
-# allauth config
-ACCOUNT_ADAPTER = 'users.adapter.AccountAdapter'
-
-ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
-ACCOUNT_USER_MODEL_EMAIL_FIELD = None
-ACCOUNT_USERNAME_REQUIRED = True
-ACCOUNT_EMAIL_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'username'
-
-ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
-ACCOUNT_AUTHENTICATED_LOGOUT_REDIRECTS = True
-
-SIGNUP_REDIRECT_URL = '/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
-
-SOCIALACCOUNT_ADAPTER = 'users.adapter.SocialAccountAdapter'
-SOCIALACCOUNT_AUTO_SIGNUP = True
-SOCIALACCOUNT_FORMS = {
-    'disconnect': 'allauth.socialaccount.forms.DisconnectForm',
-    'signup': 'allauth.socialaccount.forms.SignupForm',
-}
-SOCIALACCOUNT_PROVIDERS = {
-    "42": {
-        # For each OAuth based provider, either add a ``SocialApp``
-        # (``socialaccount`` app) containing the required client
-        # credentials, or list them here:
-        "APPS": [
-            {
-                "client_id": env("FOURTYTWO_CLIENT_ID"),
-                "secret": env("FOURTYTWO_CLIENT_SECRET"),
-            },
-        ],
-    }
-}
-
 # OAuth config
-SOCIAL_AUTH_FOURTYTWO_CLIENT_ID = env("FOURTYTWO_CLIENT_ID")
-SOCIAL_AUTH_FOURTYTWO_CLIENT_SECRET = env("FOURTYTWO_CLIENT_SECRET")
-
-REST_AUTH = {
-    'TOKEN_MODEL': None,
-    'USE_JWT': True,
-    'JWT_AUTH_HTTPONLY': False,
-    'REGISTER_SERIALIZER': 'dj_rest_auth.registration.serializers.RegisterSerializer',
-}
+FOURTYTWO_CLIENT_ID = env("FOURTYTWO_CLIENT_ID")
+FOURTYTWO_CLIENT_SECRET = env("FOURTYTWO_CLIENT_SECRET")
 
 AUTH_USER_MODEL = "users.User"
 
@@ -110,9 +60,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        "dj_rest_auth.jwt_auth.JWTAuthentication",
-    )
 }
 
 # 추가적인 JWT_AUTH 설정, https://django-rest-framework-simplejwt.readthedocs.io/en/latest/
@@ -145,7 +92,6 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -156,7 +102,8 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080",
+    "http://localhost:8000",
+    "http://127.0.0.1:8080",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
