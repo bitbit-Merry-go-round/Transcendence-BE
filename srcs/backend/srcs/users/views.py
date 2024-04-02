@@ -16,6 +16,7 @@ from .serializers import (
     UserUpdateSerializer,
     FriendListSerializer,
     FriendDetailSerializer,
+    AuthUserSerializer,
 )
 
 FOURTYTWO_CALLBACK_URI = 'http%3A%2F%2F127.0.0.1%3A8080%2Flogin'
@@ -97,11 +98,30 @@ class UserSearchAPIView(generics.RetrieveAPIView):
     http_method_names = ['get', 'options']
 
 
-class UserProfileAPIView(generics.RetrieveUpdateAPIView):
+class MyProfileAPIView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     queryset = User.objects.all()
+
+    def get_object(self):
+        return self.request.user
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return AuthUserSerializer
+        if self.request.method == 'PATCH':
+            return UserUpdateSerializer
+
+    http_method_names = ['get', 'patch', 'options']
+
+
+class UserProfileAPIView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    queryset = User.objects.all()
+    serializer_class = UserDetailSerializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -110,18 +130,10 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         username = self.kwargs['username']
-        if username == 'me':
-            return self.request.user
         user = User.objects.filter(username=username).first()
         return user
 
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return UserDetailSerializer
-        if self.request.method == 'PATCH':
-            return UserUpdateSerializer
-
-    http_method_names = ['get', 'patch', 'options']
+    http_method_names = ['get', 'options']
 
 
 class FriendListAPIView(generics.ListCreateAPIView):

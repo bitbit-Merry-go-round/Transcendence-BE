@@ -35,30 +35,37 @@ class UserSimpleSerializer(serializers.ModelSerializer):
         fields = ['username', 'avatar', 'level', 'status']
 
 
+class AuthUserSerializer(serializers.ModelSerializer):
+    avatar = BinaryField()
+    level = serializers.SerializerMethodField()
+
+    def get_level(self, obj):
+        return (obj.wins * 2 + obj.loses) / 10 + 1
+
+    class Meta:
+        model = User
+        fields = ['username', 'avatar', 'level', 'status', 'message', 'wins', 'loses']
+
+
 class UserDetailSerializer(serializers.ModelSerializer):
     avatar = BinaryField()
     level = serializers.SerializerMethodField()
-    is_me = serializers.SerializerMethodField()
     is_friend = serializers.SerializerMethodField()
 
     def get_level(self, obj):
         return (obj.wins * 2 + obj.loses) / 10 + 1
 
-    def get_is_me(self, obj):
+    def get_is_friend(self, user):
         auth_user = self.context['auth_user']
-        return auth_user.pk == obj.pk
-
-    def get_is_friend(self, obj):
-        auth_user = self.context['auth_user']
-        obj = Friend.objects.filter(from_user=auth_user.pk, to_user=obj.pk).first()
-        if obj is None:
+        user = Friend.objects.filter(from_user=auth_user.pk, to_user=user.pk).first()
+        if user is None:
             return False
         else:
             return True
 
     class Meta:
         model = User
-        fields = ['username', 'avatar', 'level', 'status', 'message', 'wins', 'loses', 'is_me', 'is_friend']
+        fields = ['username', 'avatar', 'level', 'status', 'message', 'wins', 'loses', 'is_friend']
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):

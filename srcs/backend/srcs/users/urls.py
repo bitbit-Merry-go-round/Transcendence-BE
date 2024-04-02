@@ -7,6 +7,7 @@ from .views import (
     FriendDeleteAPIView,
     UserSearchAPIView,
     fourtytwo_callback,
+    MyProfileAPIView,
 )
 
 app_name = 'users'
@@ -16,6 +17,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     path('', UserSearchAPIView.as_view()),
+    path('me/profile/', MyProfileAPIView.as_view()),
     path('<str:username>/profile/', UserProfileAPIView.as_view()),
     path('<str:from_user>/friends/', FriendListAPIView.as_view()),
     path('<str:from_user>/friends/<str:to_user>/', FriendDeleteAPIView.as_view()),
