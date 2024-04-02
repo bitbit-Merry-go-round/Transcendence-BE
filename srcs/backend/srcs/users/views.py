@@ -7,6 +7,7 @@ from rest_framework import generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import status
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User, Friend
 from .serializers import (
@@ -33,7 +34,6 @@ def fourtytwo_callback(request):
         raise JSONDecodeError(error)
 
     access_token = token_response_json.get("access_token")
-    refresh_token = token_response_json.get("refresh_token")
 
     profile_response = requests.get(
         "https://api.intra.42.fr/v2/me",
@@ -51,18 +51,26 @@ def fourtytwo_callback(request):
 
     try:
         user = User.objects.get(username=username)
+        token = RefreshToken.for_user(user)
+        refresh = str(token)
+        access = str(token.access_token)
+
         return JsonResponse({
-            'access_token': access_token,
-            'refresh_token': refresh_token
+            'access': access,
+            'refresh': refresh,
         }, status=status.HTTP_200_OK)
 
     except User.DoesNotExist:
-        user = User(username=username)
-        user.set_unusable_password()
-        user.save()
+        new_user = User(username=username)
+        new_user.set_unusable_password()
+        new_user.save()
+        token = RefreshToken.for_user(new_user)
+        refresh = str(token)
+        access = str(token.access_token)
+
         return JsonResponse({
-            'access_token': access_token,
-            'refresh_token': refresh_token
+            'access': access,
+            'refresh': refresh,
         }, status=status.HTTP_201_CREATED)
 
 
