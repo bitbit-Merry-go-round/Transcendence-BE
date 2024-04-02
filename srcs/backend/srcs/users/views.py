@@ -105,11 +105,13 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['user'] = self.request.user
+        context['auth_user'] = self.request.user
         return context
 
     def get_object(self):
         username = self.kwargs['username']
+        if username == 'me':
+            return self.request.user
         user = User.objects.filter(username=username).first()
         return user
 

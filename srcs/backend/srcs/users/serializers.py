@@ -45,12 +45,12 @@ class UserDetailSerializer(serializers.ModelSerializer):
         return (obj.wins * 2 + obj.loses) / 10 + 1
 
     def get_is_me(self, obj):
-        user = self.context['user']
-        return user.pk == obj.pk
+        auth_user = self.context['auth_user']
+        return auth_user.pk == obj.pk
 
     def get_is_friend(self, obj):
-        user = self.context['user']
-        obj = Friend.objects.filter(from_user=user.pk, to_user=obj.pk).first()
+        auth_user = self.context['auth_user']
+        obj = Friend.objects.filter(from_user=auth_user.pk, to_user=obj.pk).first()
         if obj is None:
             return False
         else:
