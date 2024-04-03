@@ -35,30 +35,37 @@ class UserSimpleSerializer(serializers.ModelSerializer):
         fields = ['username', 'avatar', 'level', 'status']
 
 
+class AuthUserSerializer(serializers.ModelSerializer):
+    avatar = BinaryField()
+    level = serializers.SerializerMethodField()
+
+    def get_level(self, obj):
+        return (obj.wins * 2 + obj.loses) / 10 + 1
+
+    class Meta:
+        model = User
+        fields = ['username', 'avatar', 'level', 'status', 'message', 'wins', 'loses']
+
+
 class UserDetailSerializer(serializers.ModelSerializer):
     avatar = BinaryField()
     level = serializers.SerializerMethodField()
-    is_me = serializers.SerializerMethodField()
     is_friend = serializers.SerializerMethodField()
 
     def get_level(self, obj):
         return (obj.wins * 2 + obj.loses) / 10 + 1
 
-    def get_is_me(self, obj):
-        user = self.context['user']
-        return user.pk == obj.pk
-
-    def get_is_friend(self, obj):
-        user = self.context['user']
-        obj = Friend.objects.filter(from_user=user.pk, to_user=obj.pk).first()
-        if obj is None:
+    def get_is_friend(self, user):
+        from_user = self.context['user']
+        friend = Friend.objects.filter(from_user=from_user, to_user=user).first()
+        if friend is None:
             return False
         else:
             return True
 
     class Meta:
         model = User
-        fields = ['username', 'avatar', 'level', 'status', 'message', 'wins', 'loses', 'is_me', 'is_friend']
+        fields = ['username', 'avatar', 'level', 'status', 'message', 'wins', 'loses', 'is_friend']
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
@@ -70,18 +77,39 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ['username', 'status', 'wins', 'loses']
 
 
-class FriendDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Friend
-        exclude = ['id']
+class FriendCreationSerializer(serializers.ModelSerializer):
+    to_user = UserDetailSerializer(read_only=True)
 
     def validate(self, data):
-        from_user = self.context['from_user']
-        if from_user != data['from_user'].username:
-            raise ValidationError('from_user does not match.')
-        if from_user == data['to_user'].username:
+        from_user = self.context['user']
+        request_data = self.context['request'].data
+        username = request_data.get('to_user')
+        to_user = User.objects.get(username=username)
+        if to_user is None:
+            raise ValidationError('to_user does not exist.')
+        if from_user == to_user:
             raise ValidationError('from_user and to_user are identical.')
         return data
+
+    def create(self, validated_data):
+        from_user = self.context['user']
+        request_data = self.context['request'].data
+        username = request_data.get('to_user')
+        to_user = User.objects.get(username=username)
+        friend = Friend.objects.create(from_user=from_user, to_user=to_user)
+        return friend
+
+    def to_representation(self, obj):
+        representation = super().to_representation(obj)
+        user_representation = representation.pop('to_user')
+        for key in user_representation:
+            representation[key] = user_representation[key]
+
+        return representation
+
+    class Meta:
+        model = Friend
+        fields = ['to_user']
 
 
 class FriendListSerializer(serializers.ModelSerializer):

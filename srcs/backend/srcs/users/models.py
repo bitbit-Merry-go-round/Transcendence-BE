@@ -41,6 +41,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     wins = models.IntegerField(default=0)
     loses = models.IntegerField(default=0)
     is_staff = models.BooleanField(default=False)
+    friends = models.ManyToManyField('self', symmetrical=False, through='Friend', through_fields=('from_user', 'to_user'))
 
     password = models.CharField(null=True)
 
