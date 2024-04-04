@@ -12,10 +12,12 @@ services:
     depends_on:
       users_db:
         condition: service_healthy
+      game_db:
+        condition: service_healthy
     ports:
       - "8000:8000"
     volumes:
-      - users_vol:/var/www/django/backend/
+      - backend_vol:/var/www/django/backend/
     networks:
       - pong_net
 
@@ -41,6 +43,23 @@ services:
       timeout: 5s
       retries: 5
 
+  game_db:
+    container_name: redis
+    image: redis:alpine
+    restart: always
+    command: redis-server --port 6379
+    volumes:
+      - game_db_vol:/data
+    expose:
+      - "6379"
+    networks:
+      - pong_net
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 networks:
   pong_net:
     driver: bridge
@@ -48,10 +67,11 @@ networks:
 volumes:
 # 볼륨
   users_db_vol:
+  game_db_vol:
 # 바인드 마운트
-  users_vol:
+  backend_vol:
     driver: local
     driver_opts:
       o: bind
       type: none
-      device: ${USERS_VOL_PATH}
+      device: ${BACKEND_VOL_PATH}
