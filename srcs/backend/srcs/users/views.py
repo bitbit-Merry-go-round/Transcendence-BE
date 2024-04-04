@@ -12,7 +12,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .utils import generate_otp, send_otp_email
-from django.shortcuts import redirect
 
 from .models import User, Friend
 from .serializers import (
@@ -25,26 +24,6 @@ from .serializers import (
 
 
 # Login with Email OTP
-class RequestOTP(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        username = request.data.get('username', '')
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            return Response({'error': 'User with this email does not exist.'}, status=status.HTTP_404_NOT_FOUND)
-
-        otp = generate_otp()
-        user.otp = otp
-        user.save()
-
-        send_otp_email(user.email, otp)
-
-        return redirect('http://localhost:8000/users/validate-otp/')
-        # return Response({'message': 'OTP has been sent to your email.', 'email': user.email}, status=status.HTTP_200_OK)
-
-
 class ValidateOTP(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
@@ -54,7 +33,7 @@ class ValidateOTP(APIView):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            return Response({'error': 'User with this email does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'User email does not match.'}, status=status.HTTP_404_NOT_FOUND)
 
         if user.otp == otp:
             user.otp = None
@@ -70,7 +49,6 @@ class ValidateOTP(APIView):
                 'refresh': refresh,
             }, status=status.HTTP_200_OK)
 
-            # return (Response({'success': 'Authentication succeeded.', '2fa': user.email_verified}, status=status.HTTP_200_OK))
         else:
             return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -109,46 +87,24 @@ def fourtytwo_callback(request):
     email = f"{username}@student.42seoul.kr"
 
     try:
-        user = User.objects.get(username=username, email=email)
-
+        user = User.objects.get(username=username)
         otp = generate_otp()
         user.otp = otp
         user.save()
-
         send_otp_email(user.email, otp)
-        print("redirect: ")
-        return JsonResponse({"username": username}, status=status.HTTP_200_OK)
 
-        # token = RefreshToken.for_user(user)
-        # refresh = str(token)
-        # access = str(token.access_token)
-        #
-        # return JsonResponse({
-        #     'access': access,
-        #     'refresh': refresh,
-        # }, status=status.HTTP_200_OK)
+        return JsonResponse({"username": username}, status=status.HTTP_200_OK)
 
     except User.DoesNotExist:
         new_user = User(username=username, email=email)
         new_user.set_unusable_password()
         new_user.save()
-
         otp = generate_otp()
         new_user.otp = otp
         new_user.save()
-
         send_otp_email(new_user.email, otp)
 
         return JsonResponse({"username": username}, status=status.HTTP_201_CREATED)
-
-        # token = RefreshToken.for_user(new_user)
-        # refresh = str(token)
-        # access = str(token.access_token)
-        #
-        # return JsonResponse({
-        #     'access': access,
-        #     'refresh': refresh,
-        # }, status=status.HTTP_201_CREATED)
 
 
 class UserSearchAPIView(generics.RetrieveAPIView):
