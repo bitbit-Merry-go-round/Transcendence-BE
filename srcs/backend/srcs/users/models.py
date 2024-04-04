@@ -45,6 +45,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     password = models.CharField(null=True)
 
+    email = models.EmailField(unique=True)
+    otp = models.CharField(max_length=6, null=True, blank=True)  # Add the otp
+    email_verified = models.BooleanField(default=False)
+
     objects = UserManager()
 
     USERNAME_FIELD = "username"
