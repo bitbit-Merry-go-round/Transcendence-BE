@@ -1,16 +1,25 @@
 from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
 
-from . import views
-from .views import UserCreationAPI, UserProfileAPI, FriendListAPI, FriendDeleteAPI
+from .views import (
+    fourtytwo_callback,
+    MyProfileAPIView,
+    MyFriendAPIView,
+    FriendDeleteAPIView,
+    UserSearchAPIView,
+    UserProfileAPIView,
+)
 
 app_name = 'users'
 
 urlpatterns = [
-    # /users/hello
-    path('hello/', views.HelloAPI),
+    path('42/callback/', fourtytwo_callback, name='42_callback'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    path('create/', UserCreationAPI.as_view()),
-    path('<pk>/profile/', UserProfileAPI.as_view()),
-    path('<str:from_user>/friends/', FriendListAPI.as_view()),
-    path('<str:from_user>/friends/<str:to_user>/', FriendDeleteAPI.as_view()),
+    path('me/profile/', MyProfileAPIView.as_view()),
+    path('me/friends/', MyFriendAPIView.as_view()),
+    path('me/friends/<str:to_user>/', FriendDeleteAPIView.as_view()),
+
+    path('', UserSearchAPIView.as_view()),
+    path('<str:username>/profile/', UserProfileAPIView.as_view()),
 ]

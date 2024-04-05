@@ -1,4 +1,7 @@
 import base64
+
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
 
@@ -8,15 +11,49 @@ def get_default_avatar(image_path):
         return base64.decodebytes(image_b64)
 
 
-class User(models.Model):
-    STATUS_CHOICES = (('OF', 'Offline'), ('ON', 'Online'), ('GA', 'Gaming'))
+class UserManager(BaseUserManager):
+    def create_user(self, username, password, **extra_fields):
+        if not username:
+            raise ValueError("Users must have an username")
 
-    uid = models.CharField(max_length=10, primary_key=True)
+        user = self.model(username=username, **extra_fields)
+        user.set_unusable_password()
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, password, **extra_fields):
+        return self.create_user(
+            username=username,
+            password=password,
+            is_staff=True,
+            is_superuser=True,
+            **extra_fields
+        )
+
+
+class User(AbstractBaseUser, PermissionsMixin):
+    STATUS_CHOICES = (('OFFLINE', 'Offline'), ('ONLINE', 'Online'), ('GAMING', 'Gaming'))
+
+    username = models.CharField(max_length=10, unique=True)
     avatar = models.BinaryField(default=get_default_avatar('static/avatar.jpg'))
-    status = models.CharField(max_length=2, choices=STATUS_CHOICES, default='ON')
+    status = models.CharField(max_length=7, choices=STATUS_CHOICES, default='ONLINE')
     message = models.TextField(blank=True, default='')
     wins = models.IntegerField(default=0)
     loses = models.IntegerField(default=0)
+    is_staff = models.BooleanField(default=False)
+    friends = models.ManyToManyField('self', symmetrical=False, through='Friend', through_fields=('from_user', 'to_user'))
+
+    password = models.CharField(null=True)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = "username"
+
+    def __str__(self):
+        return self.username
+
+    class Meta:
+        app_label = "users"
 
 
 class Friend(models.Model):
