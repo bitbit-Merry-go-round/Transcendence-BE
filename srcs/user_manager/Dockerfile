@@ -8,7 +8,7 @@ ARG DOMAIN=domain
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-WORKDIR /var/www/django/backend
+WORKDIR /var/www/django/user_manager
 
 COPY tools/run_user_manager.sh /home/run_user_manager.sh
 COPY tools/requirements.txt /home/requirements.txt
