@@ -24,19 +24,19 @@ services:
     image: postgres:14.11-alpine3.18
     restart: always
     environment:
-    # todo POSTGRES_DB 연결 안 돼서 User 이름과 동일하게 설정 함.
-    # https://hub.docker.com/_/postgres
       POSTGRES_USER: ${USERS_DB_USER}
       POSTGRES_PASSWORD: ${USERS_DB_PW}
       POSTGRES_DB: ${USERS_DB_NAME}
+      PGPORT: ${USERS_DB_PORT}
     volumes:
       - users_db_vol:/var/lib/postgresql/data
+    command: -p ${USERS_DB_PORT}
     expose:
-      - "5432"
+      - "${USERS_DB_PORT}"
     networks:
       - pong_net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      test: ["CMD-SHELL", "pg_isready", "-d","db_prod"]
       interval: 10s
       timeout: 5s
       retries: 5
