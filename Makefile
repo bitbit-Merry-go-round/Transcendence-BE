@@ -24,7 +24,7 @@ fclean:
 	$(if $(DOCKER_ID), docker rm -f $(DOCKER_ID))
 	$(if $(DOCKER_VOLUME), docker volume rm $(DOCKER_VOLUME))
 # todo 지울 이미지 수기 작성 하셈
-	docker rmi django
+	docker rmi user_manager backend
 # docker system prune -af
 # $(if $(DOCKER_IMAGE_ID), docker rmi $(DOCKER_IMAGE_ID))
 

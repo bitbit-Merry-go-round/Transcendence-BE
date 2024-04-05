@@ -5,7 +5,7 @@ services:
   # gateway로 명명 새로해야 함
   backend:
     container_name: backend
-    image: django
+    image: backend
     pull_policy: never
     build: ./backend
     env_file:
@@ -45,9 +45,9 @@ services:
   # user manager 
   user_manager:
     container_name: user_manager
-    image: django
+    image: user_manager
     pull_policy: never
-    build: ./backend
+    build: ./user_manager
     env_file:
       - .env
     depends_on:
@@ -56,7 +56,7 @@ services:
     expose:
       - "${USERS_PORT}"
     volumes:
-      - users_vol:/var/www/django/users/
+      - users_vol:/var/www/django/user_manager/
     networks:
       - pong_net
 
