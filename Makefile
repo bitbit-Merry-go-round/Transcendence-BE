@@ -2,11 +2,12 @@ DOCKER_ID := $(shell docker ps -aq)
 DOCKER_IMAGE_ID := $(shell docker images -q)
 DOCKER_VOLUME := $(shell docker volume ls -q)
 PWD := $(shell pwd)
-USERS_VOL_PATH := $(PWD)/srcs/backend/srcs
+BACKEND_VOL_PATH := $(PWD)/srcs/backend/srcs
+USERS_VOL_PATH := $(PWD)/srcs/user_manager/srcs
 
 all:
 # todo 당신이 어느 환경에 있든 볼륨에 연결해 드립니다.
-	sed -i '' 's|^\(USERS_DB_VOL_PATH\).*|USERS_DB_VOL_PATH=$(USERS_DB_VOL_PATH)|' './srcs/.env'
+	sed -i '' 's|^\(BACKEND_VOL_PATH\).*|BACKEND_VOL_PATH=$(BACKEND_VOL_PATH)|' './srcs/.env'
 	sed -i '' 's|^\(USERS_VOL_PATH\).*|USERS_VOL_PATH=$(USERS_VOL_PATH)|' './srcs/.env'
 	docker compose -f srcs/compose.yaml up -d
 
