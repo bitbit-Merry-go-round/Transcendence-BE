@@ -40,14 +40,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders',
 
     # 생성한 앱
     'users',
-
+    
     # 설치한 라이브러리
     'rest_framework',
     'rest_framework_simplejwt',
+    'corsheaders',
 ]
 
 # OAuth config
