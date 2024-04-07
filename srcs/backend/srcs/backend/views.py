@@ -6,9 +6,40 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from users.models import User
+from users.utils import generate_otp, send_otp_email
 
+# Login with Email OTP
+class ValidateOTP(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        username = request.data.get('username', '')
+        otp = request.data.get('otp', '')
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({'error': 'User email does not match.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if user.otp == otp:
+            user.otp = None
+            user.email_verified = True
+            user.save()
+
+            token = RefreshToken.for_user(user)
+            refresh = str(token)
+            access = str(token.access_token)
+
+            return JsonResponse({
+                'access': access,
+                'refresh': refresh,
+            }, status=status.HTTP_200_OK)
+
+        else:
+            return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
 
 FOURTYTWO_CALLBACK_URI = 'http%3A%2F%2F127.0.0.1%3A8080%2Flogin'
 
@@ -40,29 +71,25 @@ def fourtytwo_callback(request):
 
     profile_response_json = profile_response.json()
     username = profile_response_json.get("login")
+    email = f"{username}@student.42seoul.kr"
 
     try:
         user = User.objects.get(username=username)
-        token = RefreshToken.for_user(user)
-        refresh = str(token)
-        access = str(token.access_token)
+        otp = generate_otp()
+        user.otp = otp
+        user.save()
+        send_otp_email(user.email, otp)
 
-        return JsonResponse({
-            'access': access,
-            'refresh': refresh,
-        }, status=status.HTTP_200_OK)
+        return JsonResponse({"username": username}, status=status.HTTP_200_OK)
 
     except User.DoesNotExist:
-        new_user = User(username=username)
+        new_user = User(username=username, email=email)
         new_user.set_unusable_password()
         new_user.save()
-        token = RefreshToken.for_user(new_user)
-        refresh = str(token)
-        access = str(token.access_token)
+        otp = generate_otp()
+        new_user.otp = otp
+        new_user.save()
+        send_otp_email(new_user.email, otp)
 
-        return JsonResponse({
-            'access': access,
-            'refresh': refresh,
-        }, status=status.HTTP_201_CREATED)
-
+        return JsonResponse({"username": username}, status=status.HTTP_201_CREATED)
 

@@ -1,15 +1,6 @@
-import base64
-
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
-
-
-def get_default_avatar(image_path):
-    with open(image_path, 'rb') as f:
-        image_b64 = base64.b64encode(f.read())
-        return base64.decodebytes(image_b64)
-
 
 class UserManager(BaseUserManager):
     def create_user(self, username, password, **extra_fields):
@@ -24,25 +15,13 @@ class UserManager(BaseUserManager):
     def create_superuser(self, username, password, **extra_fields):
         return self.create_user(
             username=username,
-            password=password,
-            is_staff=True,
             is_superuser=True,
+            password=password,
             **extra_fields
         )
 
-
 class User(AbstractBaseUser, PermissionsMixin):
-    STATUS_CHOICES = (('OFFLINE', 'Offline'), ('ONLINE', 'Online'), ('GAMING', 'Gaming'))
-
     username = models.CharField(max_length=10, unique=True)
-    avatar = models.BinaryField(default=get_default_avatar('static/avatar.jpg'))
-    status = models.CharField(max_length=7, choices=STATUS_CHOICES, default='ONLINE')
-    message = models.TextField(blank=True, default='')
-    wins = models.IntegerField(default=0)
-    loses = models.IntegerField(default=0)
-    is_staff = models.BooleanField(default=False)
-    friends = models.ManyToManyField('self', symmetrical=False, through='Friend', through_fields=('from_user', 'to_user'))
-
     password = models.CharField(null=True)
 
     email = models.EmailField(unique=True)
@@ -50,7 +29,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     email_verified = models.BooleanField(default=False)
 
     objects = UserManager()
-
     USERNAME_FIELD = "username"
 
     def __str__(self):
@@ -58,11 +36,3 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         app_label = "users"
-
-
-class Friend(models.Model):
-    from_user = models.ForeignKey(User, related_name='from_user', on_delete=models.CASCADE)
-    to_user = models.ForeignKey(User, related_name='to_user', on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ['from_user', 'to_user']
