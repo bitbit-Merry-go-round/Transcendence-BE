@@ -1,9 +1,9 @@
-from django.urls import path
+from django.urls import re_path
 
 from .views import RouteUserView
 
 app_name = 'users'
 
 urlpatterns = [
-    path('', RouteUserView.as_view()),
+    re_path(r'.*', RouteUserView.as_view()),
 ]

@@ -30,7 +30,6 @@ class UserManager(BaseUserManager):
             **extra_fields
         )
 
-
 class User(AbstractBaseUser, PermissionsMixin):
     STATUS_CHOICES = (('OFFLINE', 'Offline'), ('ONLINE', 'Online'), ('GAMING', 'Gaming'))
 
