@@ -13,5 +13,5 @@ django.setup()
 
 from users.models import User
 
-user = User(username="hyecheon")
+user = User(username="hyecheon", email='hyecheon@test.com')
 user.save()
