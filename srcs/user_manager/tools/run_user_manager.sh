@@ -11,14 +11,12 @@ USERS_DB_HOST=${USERS_DB_HOST}
 USERS_DB_USER=${USERS_DB_USER}
 USERS_DB_PW=${USERS_DB_PW}
 USERS_DB_PORT=${USERS_DB_PORT}
+
+USERS_PORT=${USERS_PORT}
 EOF
 
 python manage.py makemigrations
 
 python manage.py migrate
 
-python manage.py createsuperuser --no-input
-
-python ./add_user.py
-
-python manage.py runserver 0:${USERS_DB_PORT}
+python manage.py runserver 0:${USERS_PORT}
