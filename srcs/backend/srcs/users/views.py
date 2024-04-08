@@ -1,8 +1,10 @@
 import requests
 import environ
+from django.http import HttpResponse
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
+from .utils import get_container_ip
 
 env = environ.Env()
 environ.Env.read_env()
@@ -12,6 +14,11 @@ class RouteUserView(APIView):
     # permission_classes = [IsAuthenticated]
     # authentication_classes = [JWTAuthentication]
     def get(self, request):
+        # 컨테이너의 IP 주소 얻기
+        container_ip = get_container_ip(USER_CONTAINER_HOST_NAME)
+        print(f"Container IP: {container_ip}")
+        print(f"Container IP: {container_ip}")
+        print(f"Container IP: {container_ip}")
         # TODO: url에 me 들어간 경우 username으로 치환하여 요청
         # TODO: 유효한 url로 접근해야 함.
         url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{env("USER_MANAGER_PORT")}{request.path}"
@@ -20,11 +27,11 @@ class RouteUserView(APIView):
         print(url)
         print(url)
         print(url)
-
+        
         response = requests.get(url, params=request.GET)
-        # response = requests.post(url, headers=headers, data=request.POST)
+        headers = response.headers
 
-        return Response(
+        return HttpResponse(
             content=response.content,
             status=response.status_code,
             content_type=headers['Content-Type']
