@@ -9,6 +9,7 @@ from .views import (
     UserSearchAPIView,
     UserProfileAPIView,
     ValidateOTP,
+    LogoutAPIView,
 )
 
 app_name = 'users'
@@ -17,6 +18,7 @@ urlpatterns = [
     path('42/callback/', fourtytwo_callback, name='42_callback'),
     path('validate-otp/', ValidateOTP.as_view(), name='validate-otp'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('logout/', LogoutAPIView.as_view(), name='logout'),
 
     path('me/profile/', MyProfileAPIView.as_view()),
     path('me/friends/', MyFriendAPIView.as_view()),
