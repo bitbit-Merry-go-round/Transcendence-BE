@@ -6,15 +6,21 @@ from rest_framework.views import APIView
 
 env = environ.Env()
 environ.Env.read_env()
+USER_CONTAINER_HOST_NAME = "user_manager"
 class RouteUserView(APIView):
     permission_classes = [AllowAny]
     # permission_classes = [IsAuthenticated]
     # authentication_classes = [JWTAuthentication]
-
     def get(self, request):
         # TODO: url에 me 들어간 경우 username으로 치환하여 요청
-        # TODO: {request.META.get('REMOTE_ADDR')} 이 부분 유효한 녀석으로 변경해야 함.
-        url = f"{request.scheme}://{request.META.get('REMOTE_ADDR')}:{env("USER_MANAGER_PORT")}"
+        # TODO: 유효한 url로 접근해야 함.
+        url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{env("USER_MANAGER_PORT")}{request.path}"
+        print(url)
+        print(url)
+        print(url)
+        print(url)
+        print(url)
+
         response = requests.get(url, params=request.GET)
         # response = requests.post(url, headers=headers, data=request.POST)
 
