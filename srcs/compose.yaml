@@ -26,6 +26,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: ${BACKEND_DB_USER}
+      PGUSER: ${BACKEND_DB_USER}
       POSTGRES_PASSWORD: ${BACKEND_DB_PW}
       POSTGRES_DB: ${BACKEND_DB_NAME}
       PGPORT: ${BACKEND_DB_PORT}
@@ -66,6 +67,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: ${USERS_DB_USER}
+      PGUSER: ${USERS_DB_USER}
       POSTGRES_PASSWORD: ${USERS_DB_PW}
       POSTGRES_DB: ${USERS_DB_NAME}
       PGPORT: ${USERS_DB_PORT}
