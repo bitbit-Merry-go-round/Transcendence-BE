@@ -50,6 +50,14 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 ]
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Replace with your preferred backend
+
+EMAIL_HOST = env("EMAIL_HOST")  # email host
+EMAIL_PORT = env("EMAIL_PORT")  # email port
+EMAIL_USE_TLS = env("EMAIL_USE_TLS")  # Set to False if email server doesn't use TLS
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")  # email username
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")  # email password
+
 # OAuth config
 FOURTYTWO_CLIENT_ID = env("FOURTYTWO_CLIENT_ID")
 FOURTYTWO_CLIENT_SECRET = env("FOURTYTWO_CLIENT_SECRET")

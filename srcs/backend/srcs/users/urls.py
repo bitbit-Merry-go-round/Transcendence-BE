@@ -8,12 +8,14 @@ from .views import (
     FriendDeleteAPIView,
     UserSearchAPIView,
     UserProfileAPIView,
+    ValidateOTP,
 )
 
 app_name = 'users'
 
 urlpatterns = [
     path('42/callback/', fourtytwo_callback, name='42_callback'),
+    path('validate-otp/', ValidateOTP.as_view(), name='validate-otp'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     path('me/profile/', MyProfileAPIView.as_view()),
