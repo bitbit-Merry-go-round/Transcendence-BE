@@ -29,6 +29,7 @@ services:
       PGUSER: ${BACKEND_DB_USER}
       POSTGRES_PASSWORD: ${BACKEND_DB_PW}
       POSTGRES_DB: ${BACKEND_DB_NAME}
+      PGDATABASE: ${BACKEND_DB_NAME}
       PGPORT: ${BACKEND_DB_PORT}
     volumes:
       - backend_db_vol:/var/lib/postgresql/data
@@ -44,8 +45,8 @@ services:
       retries: 5
 
   # user manager 
-  user_manager:
-    container_name: user_manager
+  user-manager:
+    container_name: user-manager
     image: user_manager
     pull_policy: never
     build: ./user_manager
@@ -70,6 +71,7 @@ services:
       PGUSER: ${USERS_DB_USER}
       POSTGRES_PASSWORD: ${USERS_DB_PW}
       POSTGRES_DB: ${USERS_DB_NAME}
+      PGDATABASE: ${USERS_DB_NAME}
       PGPORT: ${USERS_DB_PORT}
     volumes:
       - users_db_vol:/var/lib/postgresql/data
