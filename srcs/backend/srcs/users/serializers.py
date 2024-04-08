@@ -50,10 +50,18 @@ class AuthUserSerializer(serializers.ModelSerializer):
 class UserDetailSerializer(serializers.ModelSerializer):
     avatar = BinaryField()
     level = serializers.SerializerMethodField()
+    is_me = serializers.SerializerMethodField()
     is_friend = serializers.SerializerMethodField()
 
     def get_level(self, obj):
         return (obj.wins * 2 + obj.loses) / 10 + 1
+
+    def get_is_me(self, user):
+        me = self.context['user']
+        if user == me:
+            return True
+        else:
+            return False
 
     def get_is_friend(self, user):
         from_user = self.context['user']
@@ -65,7 +73,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'avatar', 'level', 'status', 'message', 'wins', 'loses', 'is_friend']
+        fields = ['username', 'avatar', 'level', 'status', 'message', 'wins', 'loses', 'is_me', 'is_friend']
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
