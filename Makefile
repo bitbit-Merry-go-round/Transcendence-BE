@@ -25,7 +25,7 @@ fclean:
 	$(if $(DOCKER_VOLUME), docker volume rm $(DOCKER_VOLUME))
 # todo 지울 이미지 수기 작성 하셈
 	docker rmi user_manager backend
-	rm ./srcs/backend/srcs/users/migrations/0* \
+	rm -f ./srcs/backend/srcs/users/migrations/0* \
 	./srcs/user_manager/srcs/users/migrations/0*
 
 # docker system prune -af

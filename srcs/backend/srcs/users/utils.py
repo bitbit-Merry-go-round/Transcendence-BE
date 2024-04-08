@@ -1,4 +1,3 @@
-import docker
 import random
 import string
 from django.core.mail import send_mail
@@ -12,14 +11,9 @@ def generate_otp(length=6):
 
 
 def send_otp_email(email, otp):
-    subject = 'Your OTP for Login'
+    subject = 'Your OTP FreshPong for Login'
     message = f'Your OTP is: {otp}'
     from_email = settings.EMAIL_HOST_USER
     recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
 
-
-def get_container_ip(container_name):
-    client = docker.from_env()
-    container = client.containers.get(container_name)
-    return container.attrs['NetworkSettings']['Networks']['bridge']['IPAddress']

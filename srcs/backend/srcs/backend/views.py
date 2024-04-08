@@ -28,6 +28,10 @@ class ValidateOTP(APIView):
             user.otp = None
             user.email_verified = True
             user.save()
+            response = requests.post(f"http://user-manager:8001/users/create/", json={
+                "username": user.username,
+                "email": user.email
+            })
 
             token = RefreshToken.for_user(user)
             refresh = str(token)
@@ -71,7 +75,7 @@ def fourtytwo_callback(request):
 
     profile_response_json = profile_response.json()
     username = profile_response_json.get("login")
-    email = f"{username}@student.42seoul.kr"
+    email = profile_response_json.get("email")
 
     try:
         user = User.objects.get(username=username)
