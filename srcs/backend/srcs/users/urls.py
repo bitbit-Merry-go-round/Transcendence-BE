@@ -1,29 +1,9 @@
-from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
+from django.urls import re_path
 
-from .views import (
-    fourtytwo_callback,
-    MyProfileAPIView,
-    MyFriendAPIView,
-    FriendDeleteAPIView,
-    UserSearchAPIView,
-    UserProfileAPIView,
-    ValidateOTP,
-    LogoutAPIView,
-)
+from .views import RouteUserView
 
 app_name = 'users'
 
 urlpatterns = [
-    path('42/callback/', fourtytwo_callback, name='42_callback'),
-    path('validate-otp/', ValidateOTP.as_view(), name='validate-otp'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('logout/', LogoutAPIView.as_view(), name='logout'),
-
-    path('me/profile/', MyProfileAPIView.as_view()),
-    path('me/friends/', MyFriendAPIView.as_view()),
-    path('me/friends/<str:to_user>/', FriendDeleteAPIView.as_view()),
-
-    path('', UserSearchAPIView.as_view()),
-    path('<str:username>/profile/', UserProfileAPIView.as_view()),
+    re_path(r'.*', RouteUserView.as_view()),
 ]

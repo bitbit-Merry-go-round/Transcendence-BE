@@ -2,20 +2,63 @@ version: '3'
 
 services:
 
+  # gateway로 명명 새로해야 함
   backend:
     container_name: backend
-    image: django
+    image: backend
     pull_policy: never
     build: ./backend
     env_file:
       - .env
     depends_on:
-      users_db:
+      backend_db:
         condition: service_healthy
     ports:
       - "8000:8000"
     volumes:
-      - users_vol:/var/www/django/backend/
+      - backend_vol:/var/www/django/backend/
+    networks:
+      - pong_net
+
+  backend_db:
+    container_name: backend_db
+    image: postgres:14.11-alpine3.18
+    restart: always
+    environment:
+      POSTGRES_USER: ${BACKEND_DB_USER}
+      PGUSER: ${BACKEND_DB_USER}
+      POSTGRES_PASSWORD: ${BACKEND_DB_PW}
+      POSTGRES_DB: ${BACKEND_DB_NAME}
+      PGDATABASE: ${BACKEND_DB_NAME}
+      PGPORT: ${BACKEND_DB_PORT}
+    volumes:
+      - backend_db_vol:/var/lib/postgresql/data
+    command: -p ${BACKEND_DB_PORT}
+    expose:
+      - "${BACKEND_DB_PORT}"
+    networks:
+      - pong_net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d","db_prod" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # user manager 
+  user-manager:
+    container_name: user-manager
+    image: user-manager
+    pull_policy: never
+    build: ./user-manager
+    env_file:
+      - .env
+    depends_on:
+      users_db:
+        condition: service_healthy
+    expose:
+      - "${USERS_PORT}"
+    volumes:
+      - users_vol:/var/www/django/user-manager/
     networks:
       - pong_net
 
@@ -24,31 +67,41 @@ services:
     image: postgres:14.11-alpine3.18
     restart: always
     environment:
-    # todo POSTGRES_DB 연결 안 돼서 User 이름과 동일하게 설정 함.
-    # https://hub.docker.com/_/postgres
       POSTGRES_USER: ${USERS_DB_USER}
+      PGUSER: ${USERS_DB_USER}
       POSTGRES_PASSWORD: ${USERS_DB_PW}
       POSTGRES_DB: ${USERS_DB_NAME}
+      PGDATABASE: ${USERS_DB_NAME}
+      PGPORT: ${USERS_DB_PORT}
     volumes:
       - users_db_vol:/var/lib/postgresql/data
+    command: -p ${USERS_DB_PORT}
     expose:
-      - "5432"
+      - "${USERS_DB_PORT}"
     networks:
       - pong_net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      test: [ "CMD-SHELL", "pg_isready", "-d","db_prod" ]
       interval: 10s
       timeout: 5s
       retries: 5
+
 
 networks:
   pong_net:
     driver: bridge
 
 volumes:
-# 볼륨
+  # 볼륨
+  backend_db_vol:
   users_db_vol:
-# 바인드 마운트
+  # 바인드 마운트
+  backend_vol:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${BACKEND_VOL_PATH}
   users_vol:
     driver: local
     driver_opts:
