@@ -9,8 +9,11 @@ from rest_framework.views import APIView
 env = environ.Env()
 environ.Env.read_env()
 USER_CONTAINER_HOST_NAME = "user-manager"
+
+
 class RouteUserView(APIView):
     permission_classes = [AllowAny]
+
     # TODO: replace with below
     # permission_classes = [IsAuthenticated]
     # authentication_classes = [JWTAuthentication]
@@ -23,12 +26,13 @@ class RouteUserView(APIView):
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
         query = request.META.get("QUERY_STRING")
         user_manager_path = request.path
+        user_manager_port = env("USER_MANAGER_PORT")
         if "me" in request.path:
             user_manager_path = user_manager_path.replace("me", payload.get("user_id"))
-        if query is not "":
-            url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{env("USER_MANAGER_PORT")}{user_manager_path}?{query}"
+        if query != "":
+            url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{user_manager_port}{user_manager_path}?{query}"
         else:
-            url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{env("USER_MANAGER_PORT")}{user_manager_path}"
+            url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{user_manager_port}{user_manager_path}"
 
         response = requests.get(
             url,
@@ -47,9 +51,10 @@ class RouteUserView(APIView):
         token = request.headers.get("Authorization")
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
+        user_manager_port = env("USER_MANAGER_PORT")
         if "me" in request.path:
             user_manager_path = request.path.replace("me", payload.get("user_id"))
-        url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{env("USER_MANAGER_PORT")}{user_manager_path}"
+        url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{user_manager_port}{user_manager_path}"
 
         content_type = request.headers.get("Content-Type")
         response = requests.patch(
@@ -68,14 +73,15 @@ class RouteUserView(APIView):
             status=response.status_code,
             headers=headers
         )
-    
+
     def post(self, request):
         token = request.headers.get("Authorization")
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
+        user_manager_port = env("USER_MANAGER_PORT")
         if "me" in request.path:
             user_manager_path = request.path.replace("me", payload.get("user_id"))
-        url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{env("USER_MANAGER_PORT")}{user_manager_path}"
+        url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{user_manager_port}{user_manager_path}"
 
         content_type = request.headers.get("Content-Type")
         response = requests.post(
@@ -100,9 +106,10 @@ class RouteUserView(APIView):
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
         user_manager_path = request.path
+        user_manager_port = env("USER_MANAGER_PORT")
         if "me" in request.path:
             user_manager_path = user_manager_path.replace("me", payload.get("user_id"))
-        url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{env("USER_MANAGER_PORT")}{user_manager_path}"
+        url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{user_manager_port}{user_manager_path}"
 
         response = requests.delete(
             url,
@@ -118,4 +125,3 @@ class RouteUserView(APIView):
         )
 
     http_method_names = ['get', 'post', 'patch', 'delete', 'options']
-    

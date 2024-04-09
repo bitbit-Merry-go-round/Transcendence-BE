@@ -8,6 +8,7 @@ def get_default_avatar(image_path):
         image_b64 = base64.b64encode(f.read())
         return base64.decodebytes(image_b64)
 
+
 class User(models.Model):
     STATUS_CHOICES = (('OFFLINE', 'Offline'), ('ONLINE', 'Online'), ('GAMING', 'Gaming'))
 
@@ -17,7 +18,8 @@ class User(models.Model):
     message = models.TextField(blank=True, default='')
     wins = models.IntegerField(default=0)
     loses = models.IntegerField(default=0)
-    friends = models.ManyToManyField('self', symmetrical=False, through='Friend', through_fields=('from_user', 'to_user'))
+    friends = models.ManyToManyField('self', symmetrical=False, through='Friend',
+                                     through_fields=('from_user', 'to_user'))
 
     def __str__(self):
         return self.username

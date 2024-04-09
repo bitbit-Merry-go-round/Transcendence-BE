@@ -2,6 +2,7 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
+
 class UserManager(BaseUserManager):
     def create_user(self, username, password, **extra_fields):
         if not username:
@@ -19,6 +20,7 @@ class UserManager(BaseUserManager):
             password=password,
             **extra_fields
         )
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=10, unique=True)

@@ -39,7 +39,7 @@ services:
     networks:
       - pong_net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d","db_prod"]
+      test: [ "CMD-SHELL", "pg_isready", "-d","db_prod" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -81,7 +81,7 @@ services:
     networks:
       - pong_net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d","db_prod"]
+      test: [ "CMD-SHELL", "pg_isready", "-d","db_prod" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -92,10 +92,10 @@ networks:
     driver: bridge
 
 volumes:
-# 볼륨
+  # 볼륨
   backend_db_vol:
   users_db_vol:
-# 바인드 마운트
+  # 바인드 마운트
   backend_vol:
     driver: local
     driver_opts:

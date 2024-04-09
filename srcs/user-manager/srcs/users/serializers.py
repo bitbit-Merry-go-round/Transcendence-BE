@@ -1,10 +1,10 @@
 import base64
 
-from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from .models import User, Friend
+
 
 class BinaryField(serializers.Field):
     def to_representation(self, value):
@@ -30,7 +30,6 @@ class UserSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'avatar', 'level', 'status']
-
 
 
 class UserDetailSerializer(serializers.ModelSerializer):

@@ -7,14 +7,18 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.views import TokenBlacklistView
 from users.models import User
 from users.utils import generate_otp, send_otp_email
+
 
 # Login with Email OTP
 class ValidateOTP(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         username = request.data.get('username', '')
         otp = request.data.get('otp', '')
@@ -45,7 +49,9 @@ class ValidateOTP(APIView):
         else:
             return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
 
+
 FOURTYTWO_CALLBACK_URI = 'http%3A%2F%2F127.0.0.1%3A8080%2Flogin'
+
 
 def fourtytwo_callback(request):
     client_id = settings.FOURTYTWO_CLIENT_ID
@@ -97,3 +103,23 @@ def fourtytwo_callback(request):
 
         return JsonResponse({"username": username}, status=status.HTTP_201_CREATED)
 
+
+class LogoutAPIView(TokenBlacklistView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request, *args, **kwargs):
+        refresh = request.data["refresh"]
+        data = {"refresh": str(refresh)}
+        serializer = self.get_serializer(data=data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+
+        response = Response({"detail": "token blacklisted"}, status=status.HTTP_200_OK)
+
+        return response
+
+    http_method_names = ['post', 'options']

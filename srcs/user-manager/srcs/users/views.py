@@ -1,10 +1,5 @@
-from json import JSONDecodeError
-
 import environ
 import jwt
-import requests
-from django.conf import settings
-from django.http import JsonResponse
 from rest_framework import generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
@@ -20,6 +15,7 @@ from .serializers import (
 
 env = environ.Env()
 environ.Env.read_env()
+
 
 class UserSearchAPIView(generics.RetrieveAPIView):
     permission_classes = [AllowAny]
@@ -45,6 +41,7 @@ class UserSearchAPIView(generics.RetrieveAPIView):
 
     http_method_names = ['get', 'options']
 
+
 class UserProfileAPIView(generics.RetrieveUpdateAPIView):
     permission_classes = [AllowAny]
 
@@ -63,7 +60,7 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
         username = self.kwargs["username"]
         user = User.objects.get(username=username)
         return user
-    
+
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return UserDetailSerializer
@@ -118,6 +115,7 @@ class FriendDeleteAPIView(generics.DestroyAPIView):
         return obj
 
     http_method_names = ['delete', 'options']
+
 
 class UserCreationAPIView(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
