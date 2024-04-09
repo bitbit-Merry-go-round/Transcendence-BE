@@ -94,4 +94,27 @@ class RouteUserView(APIView):
             status=response.status_code,
             headers=headers
         )
-    http_method_names = ['get', 'post', 'patch', 'options']
+
+    def delete(self, request):
+        token = request.headers.get("Authorization")
+        bearer, _, token = token.partition(' ')
+        payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
+        user_manager_path = request.path
+        if "me" in request.path:
+            user_manager_path = user_manager_path.replace("me", payload.get("user_id"))
+        url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{env("USER_MANAGER_PORT")}{user_manager_path}"
+
+        response = requests.delete(
+            url,
+            params=self.request.method,
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        headers = response.headers
+
+        return HttpResponse(
+            content=response.content,
+            status=response.status_code,
+            headers=headers
+        )
+
+    http_method_names = ['get', 'post', 'patch', 'delete', 'options']
