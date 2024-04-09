@@ -1,6 +1,6 @@
 import os
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "user_manager.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "user-manager.settings")
 
 import django
 

@@ -47,9 +47,9 @@ services:
   # user manager 
   user-manager:
     container_name: user-manager
-    image: user_manager
+    image: user-manager
     pull_policy: never
-    build: ./user_manager
+    build: ./user-manager
     env_file:
       - .env
     depends_on:
@@ -58,7 +58,7 @@ services:
     expose:
       - "${USERS_PORT}"
     volumes:
-      - users_vol:/var/www/django/user_manager/
+      - users_vol:/var/www/django/user-manager/
     networks:
       - pong_net
 
