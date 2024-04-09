@@ -6,11 +6,11 @@ from rest_framework.permissions import AllowAny
 
 from .models import User, Friend
 from .serializers import (
+    UserInitSerializer,
     UserDetailSerializer,
     UserUpdateSerializer,
     FriendListSerializer,
     FriendCreationSerializer,
-    UserLoginSerializer,
 )
 
 env = environ.Env()
@@ -25,12 +25,15 @@ class UserSearchAPIView(generics.RetrieveAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
+
         query = self.request.query_params
-        context["username"] = User.objects.get(username=query.get("search"))
+        context["username"] = query.get("search")
+
         token = self.request.headers.get("Authorization")
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
         context["auth_user"] = payload.get("user_id")
+
         return context
 
     def get_object(self):
@@ -49,16 +52,20 @@ class UserProfileAPIView(generics.RetrieveUpdateAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
+
         context["username"] = self.kwargs["username"]
+
         token = self.request.headers.get("Authorization")
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
         context["auth_user"] = payload.get("user_id")
+
         return context
 
     def get_object(self):
+        queryset = self.get_queryset()
         username = self.kwargs["username"]
-        user = User.objects.get(username=username)
+        user = get_object_or_404(queryset, username=username)
         return user
 
     def get_serializer_class(self):
@@ -75,19 +82,19 @@ class MyFriendAPIView(generics.ListCreateAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
+
+        context["username"] = self.kwargs["username"]
+
         token = self.request.headers.get("Authorization")
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
         context["auth_user"] = payload.get("user_id")
-        context["username"] = context["auth_user"]
+
         return context
 
     def get_queryset(self):
-        token = self.request.headers.get("Authorization")
-        bearer, _, token = token.partition(' ')
-        payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
-        from_user = payload.get("user_id")
-        from_user = User.objects.get(username=from_user)
+        username = self.kwargs["username"]
+        from_user = get_object_or_404(User.objects.all(), username=username)
         queryset = Friend.objects.filter(from_user=from_user)
         return queryset
 
@@ -107,19 +114,24 @@ class FriendDeleteAPIView(generics.DestroyAPIView):
     serializer_class = FriendListSerializer
 
     def get_object(self):
+        queryset = self.get_queryset()
+
         from_user = self.kwargs["from_user"]
         to_user = self.kwargs["to_user"]
-        from_user = User.objects.get(username=from_user)
-        to_user = User.objects.get(username=to_user)
-        obj = Friend.objects.get(from_user=from_user, to_user=to_user)
-        return obj
+
+        from_user = get_object_or_404(User.objects.all(), username=from_user)
+        to_user = get_object_or_404(User.objects.all(), username=to_user)
+
+        friend = get_object_or_404(queryset, from_user=from_user, to_user=to_user)
+        return friend
 
     http_method_names = ['delete', 'options']
 
 
 class UserCreationAPIView(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
-    serializer_class = UserLoginSerializer
+
     queryset = User.objects.all()
+    serializer_class = UserInitSerializer
 
     http_method_names = ['post', 'options']
