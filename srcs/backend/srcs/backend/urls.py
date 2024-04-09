@@ -16,8 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from .views import fourtytwo_callback, ValidateOTP
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('42/callback/', fourtytwo_callback, name='42_callback'),
+    path('validate-otp/', ValidateOTP.as_view(), name='validate-otp'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('users/', include('users.urls')),
 ]
