@@ -86,6 +86,48 @@ services:
       timeout: 5s
       retries: 5
 
+  # game
+  game:
+    container_name: game
+    image: game
+    pull_policy: never
+    build: ./game
+    env_file:
+      - .env
+    depends_on:
+      game_db:
+        condition: service_healthy
+    expose:
+      - "${GAME_PORT}"
+    volumes:
+      - game_vol:/var/www/django/game/
+    networks:
+      - pong_net
+
+  game_db:
+    container_name: game_db
+    image: postgres:14.11-alpine3.18
+    restart: always
+    environment:
+      POSTGRES_USER: ${GAME_DB_USER}
+      PGUSER: ${GAME_DB_USER}
+      POSTGRES_PASSWORD: ${GAME_DB_PW}
+      POSTGRES_DB: ${GAME_DB_NAME}
+      PGDATABASE: ${GAME_DB_NAME}
+      PGPORT: ${GAME_DB_PORT}
+    volumes:
+      - game_db_vol:/var/lib/postgresql/data
+    command: -p ${GAME_DB_PORT}
+    expose:
+      - "${GAME_DB_PORT}"
+    networks:
+      - pong_net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d","db_prod" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
 networks:
   pong_net:
@@ -95,6 +137,7 @@ volumes:
   # 볼륨
   backend_db_vol:
   users_db_vol:
+  game_db_vol:
   # 바인드 마운트
   backend_vol:
     driver: local
@@ -108,3 +151,10 @@ volumes:
       o: bind
       type: none
       device: ${USERS_VOL_PATH}
+  game_vol:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${GAME_VOL_PATH}
+
