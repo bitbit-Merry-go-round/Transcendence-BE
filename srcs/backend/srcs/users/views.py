@@ -1,7 +1,8 @@
 import requests
 import jwt
 import environ
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
@@ -20,6 +21,11 @@ class RouteToUserManagerAPIView(APIView):
 
     def get(self, request):
         token = request.headers.get("Authorization")
+        if token is None:
+            return JsonResponse({
+                "detail": "invalid access token"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
         username = payload.get("user_id")
@@ -52,6 +58,11 @@ class RouteToUserManagerAPIView(APIView):
 
     def patch(self, request):
         token = request.headers.get("Authorization")
+        if token is None:
+            return JsonResponse({
+                "detail": "invalid access token"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
         username = payload.get("user_id")
@@ -84,6 +95,11 @@ class RouteToUserManagerAPIView(APIView):
 
     def post(self, request):
         token = request.headers.get("Authorization")
+        if token is None:
+            return JsonResponse({
+                "detail": "invalid access token"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
         username = payload.get("user_id")
@@ -116,6 +132,11 @@ class RouteToUserManagerAPIView(APIView):
 
     def delete(self, request):
         token = request.headers.get("Authorization")
+        if token is None:
+            return JsonResponse({
+                "detail": "invalid access token"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
         username = payload.get("user_id")
