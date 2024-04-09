@@ -14,7 +14,7 @@ class BinaryField(serializers.Field):
         return base64.b64decode(value)
 
 
-class UserLoginSerializer(serializers.ModelSerializer):
+class UserInitSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = "__all__"
@@ -38,13 +38,29 @@ class UserDetailSerializer(serializers.ModelSerializer):
     is_me = serializers.SerializerMethodField()
     is_friend = serializers.SerializerMethodField()
 
+    def validate(self, data):
+        auth_user = self.context["auth_user"]
+        username = self.context["username"]
+
+        auth_user = User.objects.filter(username=auth_user).first()
+        user = User.objects.filter(username=username).first()
+
+        if auth_user is None:
+            raise ValidationError("auth username does not exist")
+        if user is None:
+            raise ValidationError("username does not exist")
+
+        return data
+
     def get_level(self, obj):
         return (obj.wins * 2 + obj.loses) / 10 + 1
 
-    def get_is_me(self, user):
+    def get_is_me(self, obj):
         me = self.context["auth_user"]
+
         me = User.objects.get(username=me)
-        user = User.objects.get(username=user)
+        user = obj
+
         if me == user:
             return True
         else:
@@ -53,9 +69,12 @@ class UserDetailSerializer(serializers.ModelSerializer):
     def get_is_friend(self, user):
         from_user = self.context["auth_user"]
         to_user = self.context["username"]
+
         from_user = User.objects.get(username=from_user)
         to_user = User.objects.get(username=to_user)
+
         friend = Friend.objects.filter(from_user=from_user, to_user=to_user).first()
+
         if friend is None:
             return False
         else:
@@ -80,22 +99,35 @@ class FriendCreationSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         from_user = self.context['auth_user']
+        from_user = User.objects.filter(username=from_user).first()
+
         request_data = self.context['request'].data
-        username = request_data.get('to_user')
-        to_user = User.objects.get(username=username)
+        to_user = request_data.get('to_user')
+        to_user = User.objects.filter(username=to_user).first()
+
+        if from_user is None:
+            raise ValidationError("from_user does not exist")
         if to_user is None:
-            raise ValidationError('to_user does not exist.')
+            raise ValidationError("to_user does not exist")
         if from_user == to_user:
-            raise ValidationError('from_user and to_user are identical.')
+            raise ValidationError("from_user and to_user are identical")
+
+        friend = Friend.objects.filter(from_user=from_user, to_user=to_user).first()
+        if friend is not None:
+            raise ValidationError("friend already exists")
+
         return data
 
     def create(self, validated_data):
         from_user = self.context['auth_user']
         request_data = self.context['request'].data
         to_user = request_data.get('to_user')
+
         from_user = User.objects.get(username=from_user)
         to_user = User.objects.get(username=to_user)
+
         friend = Friend.objects.create(from_user=from_user, to_user=to_user)
+
         return friend
 
     def to_representation(self, obj):
