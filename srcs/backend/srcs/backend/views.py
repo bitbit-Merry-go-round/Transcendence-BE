@@ -23,7 +23,7 @@ class OtpValidationAPIView(APIView):
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             return JsonResponse({
-                'message': 'user email does not match'
+                'detail': 'user email does not match'
             }, status=status.HTTP_404_NOT_FOUND)
 
         if user.otp == otp:
@@ -46,7 +46,7 @@ class OtpValidationAPIView(APIView):
 
         else:
             return JsonResponse({
-                'message': 'invalid OTP'
+                'detail': 'invalid OTP'
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -67,7 +67,7 @@ def fourtytwo_callback(request):
     error = token_response_json.get("error", None)
     if error is not None:
         return JsonResponse({
-            "message": error
+            "detail": error
         }, status=response_status)
 
     access_token = token_response_json.get("access_token")
@@ -80,7 +80,7 @@ def fourtytwo_callback(request):
 
     if response_status != 200:
         return JsonResponse({
-            "message": "failed to fetch 42 profile"
+            "detail": "failed to fetch 42 profile"
         }, status=response_status)
 
     profile_response_json = profile_response.json()
@@ -117,7 +117,13 @@ class LogoutAPIView(TokenBlacklistView):
     authentication_classes = [JWTAuthentication]
 
     def post(self, request, *args, **kwargs):
-        refresh = request.data["refresh"]
+        try:
+            refresh = request.data["refresh"]
+        except:
+            return JsonResponse({
+                "detail": "invalid refresh token"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         data = {"refresh": str(refresh)}
         serializer = self.get_serializer(data=data)
 
@@ -127,7 +133,7 @@ class LogoutAPIView(TokenBlacklistView):
             raise InvalidToken(e.args[0])
 
         return JsonResponse({
-            "message": "logout success"
+            "detail": "logout success"
         }, status=status.HTTP_200_OK)
 
     http_method_names = ['post', 'options']
