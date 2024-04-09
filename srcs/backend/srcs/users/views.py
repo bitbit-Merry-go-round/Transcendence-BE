@@ -118,3 +118,4 @@ class RouteUserView(APIView):
         )
 
     http_method_names = ['get', 'post', 'patch', 'delete', 'options']
+    

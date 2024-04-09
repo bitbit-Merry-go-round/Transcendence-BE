@@ -11,7 +11,7 @@ def generate_otp(length=6):
 
 
 def send_otp_email(email, otp):
-    subject = 'Your OTP FreshPong for Login'
+    subject = 'Your OTP for FreshPong Login'
     message = f'Your OTP is: {otp}'
     from_email = settings.EMAIL_HOST_USER
     recipient_list = [email]
