@@ -29,7 +29,7 @@ class RouteUserView(APIView):
         user_manager_port = env("USER_MANAGER_PORT")
         if "me" in request.path:
             user_manager_path = user_manager_path.replace("me", payload.get("user_id"))
-        if query is not "":
+        if query != "":
             url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{user_manager_port}{user_manager_path}?{query}"
         else:
             url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{user_manager_port}{user_manager_path}"
