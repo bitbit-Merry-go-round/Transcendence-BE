@@ -30,10 +30,13 @@ class OtpValidationAPIView(APIView):
             user.otp = None
             user.email_verified = True
             user.save()
-            response = requests.post(f"http://user-manager:8001/users/create/", json={
-                "username": user.username,
-                "email": user.email
-            })
+            response = requests.post(
+                f"http://user-manager:8001/users/create/",
+                json={
+                    "username": user.username,
+                    "email": user.email
+                }
+            )
 
             token = RefreshToken.for_user(user)
             refresh = str(token)
