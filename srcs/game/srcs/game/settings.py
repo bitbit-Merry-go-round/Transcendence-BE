@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # 생성한 앱
-    'record'
+    'records'
 ]
 
 MIDDLEWARE = [
