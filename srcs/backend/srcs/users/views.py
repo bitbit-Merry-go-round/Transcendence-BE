@@ -46,7 +46,6 @@ class RouteToUserManagerAPIView(APIView):
 
         response = requests.get(
             user_manager_url,
-            params=self.request.method,
             headers={"Authorization": f"Bearer {token}"}
         )
 
@@ -79,7 +78,6 @@ class RouteToUserManagerAPIView(APIView):
 
         response = requests.patch(
             user_manager_url,
-            params=self.request.method,
             data=request.body,
             headers={
                 "Authorization": f"Bearer {token}",
@@ -116,7 +114,6 @@ class RouteToUserManagerAPIView(APIView):
 
         response = requests.post(
             user_manager_url,
-            params=self.request.method,
             data=request.body,
             headers={
                 "Authorization": f"Bearer {token}",
@@ -152,7 +149,6 @@ class RouteToUserManagerAPIView(APIView):
 
         response = requests.delete(
             user_manager_url,
-            params=self.request.method,
             headers={"Authorization": f"Bearer {token}"}
         )
 
