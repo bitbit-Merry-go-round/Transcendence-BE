@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.db import models
 
 
@@ -10,7 +8,7 @@ class Game(models.Model):
     player_two = models.CharField(max_length=10, unique=True)
     player_one_score = models.IntegerField()
     player_two_score = models.IntegerField()
-    time = models.DateTimeField(default=datetime.now, blank=True)
+    time = models.DateTimeField()
     type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='1V1')
 
     class Meta:
