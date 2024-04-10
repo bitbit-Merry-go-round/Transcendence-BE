@@ -1,10 +1,7 @@
-from json import JSONDecodeError
-
 import requests
 from django.conf import settings
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
@@ -15,8 +12,7 @@ from users.models import User
 from users.utils import generate_otp, send_otp_email
 
 
-# Login with Email OTP
-class ValidateOTP(APIView):
+class OtpValidationAPIView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -26,16 +22,21 @@ class ValidateOTP(APIView):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            return Response({'error': 'User email does not match.'}, status=status.HTTP_404_NOT_FOUND)
+            return JsonResponse({
+                'detail': 'user email does not match'
+            }, status=status.HTTP_404_NOT_FOUND)
 
         if user.otp == otp:
             user.otp = None
             user.email_verified = True
             user.save()
-            response = requests.post(f"http://user-manager:8001/users/create/", json={
-                "username": user.username,
-                "email": user.email
-            })
+            response = requests.post(
+                f"http://user-manager:8001/users/create/",
+                json={
+                    "username": user.username,
+                    "email": user.email
+                }
+            )
 
             token = RefreshToken.for_user(user)
             refresh = str(token)
@@ -43,11 +44,13 @@ class ValidateOTP(APIView):
 
             return JsonResponse({
                 'access': access,
-                'refresh': refresh,
+                'refresh': refresh
             }, status=status.HTTP_200_OK)
 
         else:
-            return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({
+                'detail': 'invalid OTP'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 FOURTYTWO_CALLBACK_URI = 'http%3A%2F%2F127.0.0.1%3A8080%2Flogin'
@@ -59,12 +62,16 @@ def fourtytwo_callback(request):
     code = request.GET.get("code")
 
     token_response = requests.post(
-        f"https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&code={code}&redirect_uri={FOURTYTWO_CALLBACK_URI}")
+        f"https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&code={code}&redirect_uri={FOURTYTWO_CALLBACK_URI}"
+    )
+    response_status = token_response.status_code
     token_response_json = token_response.json()
 
     error = token_response_json.get("error", None)
     if error is not None:
-        raise JSONDecodeError(error)
+        return JsonResponse({
+            "detail": error
+        }, status=response_status)
 
     access_token = token_response_json.get("access_token")
 
@@ -76,7 +83,7 @@ def fourtytwo_callback(request):
 
     if response_status != 200:
         return JsonResponse({
-            'message': 'Bad Request'
+            "detail": "failed to fetch 42 profile"
         }, status=response_status)
 
     profile_response_json = profile_response.json()
@@ -90,7 +97,9 @@ def fourtytwo_callback(request):
         user.save()
         send_otp_email(user.email, otp)
 
-        return JsonResponse({"username": username}, status=status.HTTP_200_OK)
+        return JsonResponse({
+            "username": username
+        }, status=status.HTTP_200_OK)
 
     except User.DoesNotExist:
         new_user = User(username=username, email=email)
@@ -101,7 +110,9 @@ def fourtytwo_callback(request):
         new_user.save()
         send_otp_email(new_user.email, otp)
 
-        return JsonResponse({"username": username}, status=status.HTTP_201_CREATED)
+        return JsonResponse({
+            "username": username
+        }, status=status.HTTP_201_CREATED)
 
 
 class LogoutAPIView(TokenBlacklistView):
@@ -109,7 +120,13 @@ class LogoutAPIView(TokenBlacklistView):
     authentication_classes = [JWTAuthentication]
 
     def post(self, request, *args, **kwargs):
-        refresh = request.data["refresh"]
+        try:
+            refresh = request.data["refresh"]
+        except:
+            return JsonResponse({
+                "detail": "invalid refresh token"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         data = {"refresh": str(refresh)}
         serializer = self.get_serializer(data=data)
 
@@ -118,8 +135,8 @@ class LogoutAPIView(TokenBlacklistView):
         except TokenError as e:
             raise InvalidToken(e.args[0])
 
-        response = Response({"detail": "token blacklisted"}, status=status.HTTP_200_OK)
-
-        return response
+        return JsonResponse({
+            "detail": "logout success"
+        }, status=status.HTTP_200_OK)
 
     http_method_names = ['post', 'options']

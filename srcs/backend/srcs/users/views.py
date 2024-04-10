@@ -1,17 +1,18 @@
 import requests
 import jwt
 import environ
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
 
 env = environ.Env()
 environ.Env.read_env()
-USER_CONTAINER_HOST_NAME = "user-manager"
+USER_MANAGER_HOST_NAME = "user-manager"
 
 
-class RouteUserView(APIView):
+class RouteToUserManagerAPIView(APIView):
     permission_classes = [AllowAny]
 
     # TODO: replace with below
@@ -19,46 +20,65 @@ class RouteUserView(APIView):
     # authentication_classes = [JWTAuthentication]
 
     def get(self, request):
-        # TODO: url에 me 들어간 경우 username으로 치환하여 요청
-        # TODO: 유효한 url로 접근해야 함.
         token = request.headers.get("Authorization")
+        if token is None:
+            return JsonResponse({
+                "detail": "invalid access token"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
+        username = payload.get("user_id")
+
         query = request.META.get("QUERY_STRING")
-        user_manager_path = request.path
+
+        user_manager_scheme = request.scheme
         user_manager_port = env("USER_MANAGER_PORT")
-        if "me" in request.path:
-            user_manager_path = user_manager_path.replace("me", payload.get("user_id"))
+        user_manager_path = request.path
+
+        if "me" in user_manager_path:
+            user_manager_path = user_manager_path.replace("me", username)
+
+        user_manager_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
+
         if query != "":
-            url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{user_manager_port}{user_manager_path}?{query}"
-        else:
-            url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{user_manager_port}{user_manager_path}"
+            user_manager_url = user_manager_url + f"?{query}"
 
         response = requests.get(
-            url,
+            user_manager_url,
             params=self.request.method,
             headers={"Authorization": f"Bearer {token}"}
         )
-        headers = response.headers
 
         return HttpResponse(
             content=response.content,
             status=response.status_code,
-            headers=headers
+            headers=response.headers
         )
 
     def patch(self, request):
         token = request.headers.get("Authorization")
+        if token is None:
+            return JsonResponse({
+                "detail": "invalid access token"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
-        user_manager_port = env("USER_MANAGER_PORT")
-        if "me" in request.path:
-            user_manager_path = request.path.replace("me", payload.get("user_id"))
-        url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{user_manager_port}{user_manager_path}"
+        username = payload.get("user_id")
 
+        user_manager_scheme = request.scheme
+        user_manager_port = env("USER_MANAGER_PORT")
+        user_manager_path = request.path
+
+        if "me" in user_manager_path:
+            user_manager_path = user_manager_path.replace("me", username)
+
+        user_manager_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
         content_type = request.headers.get("Content-Type")
+
         response = requests.patch(
-            url,
+            user_manager_url,
             params=self.request.method,
             data=request.body,
             headers={
@@ -66,26 +86,36 @@ class RouteUserView(APIView):
                 "Content-Type": content_type
             }
         )
-        headers = response.headers
 
         return HttpResponse(
             content=response.content,
             status=response.status_code,
-            headers=headers
+            headers=response.headers
         )
 
     def post(self, request):
         token = request.headers.get("Authorization")
+        if token is None:
+            return JsonResponse({
+                "detail": "invalid access token"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
-        user_manager_port = env("USER_MANAGER_PORT")
-        if "me" in request.path:
-            user_manager_path = request.path.replace("me", payload.get("user_id"))
-        url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{user_manager_port}{user_manager_path}"
+        username = payload.get("user_id")
 
+        user_manager_scheme = request.scheme
+        user_manager_port = env("USER_MANAGER_PORT")
+        user_manager_path = request.path
+
+        if "me" in user_manager_path:
+            user_manager_path = user_manager_path.replace("me", username)
+
+        user_manager_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
         content_type = request.headers.get("Content-Type")
+
         response = requests.post(
-            url,
+            user_manager_url,
             params=self.request.method,
             data=request.body,
             headers={
@@ -93,35 +123,43 @@ class RouteUserView(APIView):
                 "Content-Type": content_type
             }
         )
-        headers = response.headers
 
         return HttpResponse(
             content=response.content,
             status=response.status_code,
-            headers=headers
+            headers=response.headers
         )
 
     def delete(self, request):
         token = request.headers.get("Authorization")
+        if token is None:
+            return JsonResponse({
+                "detail": "invalid access token"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
         bearer, _, token = token.partition(' ')
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
-        user_manager_path = request.path
+        username = payload.get("user_id")
+
+        user_manager_scheme = request.scheme
         user_manager_port = env("USER_MANAGER_PORT")
-        if "me" in request.path:
-            user_manager_path = user_manager_path.replace("me", payload.get("user_id"))
-        url = f"{request.scheme}://{USER_CONTAINER_HOST_NAME}:{user_manager_port}{user_manager_path}"
+        user_manager_path = request.path
+
+        if "me" in user_manager_path:
+            user_manager_path = user_manager_path.replace("me", username)
+
+        user_manager_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
 
         response = requests.delete(
-            url,
+            user_manager_url,
             params=self.request.method,
             headers={"Authorization": f"Bearer {token}"}
         )
-        headers = response.headers
 
         return HttpResponse(
             content=response.content,
             status=response.status_code,
-            headers=headers
+            headers=response.headers
         )
 
     http_method_names = ['get', 'post', 'patch', 'delete', 'options']
