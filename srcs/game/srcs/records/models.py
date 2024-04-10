@@ -1,3 +1,27 @@
+from datetime import datetime
+
 from django.db import models
 
-# Create your models here.
+
+class Game(models.Model):
+    TYPE_CHOICES = (('1V1', '1v1'), ('TOURNAMENT', 'Tournament'))
+
+    player_one = models.CharField(max_length=10, unique=True)
+    player_two = models.CharField(max_length=10, unique=True)
+    player_one_score = models.IntegerField()
+    player_two_score = models.IntegerField()
+    time = models.DateTimeField(default=datetime.now, blank=True)
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='1V1')
+
+    class Meta:
+        app_label = "records"
+
+
+class Tournament(models.Model):
+    game_one = models.ForeignKey(Game, related_name='game_one', on_delete=models.CASCADE)
+    game_two = models.ForeignKey(Game, related_name='game_two', on_delete=models.CASCADE)
+    game_three = models.ForeignKey(Game, related_name='game_three', on_delete=models.CASCADE)
+    username = models.CharField(max_length=10, unique=True)
+
+    class Meta:
+        unique_together = ['game_one', 'game_two', 'game_three']
