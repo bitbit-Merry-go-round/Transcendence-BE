@@ -4,8 +4,8 @@ from django.db import models
 class Game(models.Model):
     TYPE_CHOICES = (('1V1', '1v1'), ('TOURNAMENT', 'Tournament'))
 
-    player_one = models.CharField(max_length=10, unique=True)
-    player_two = models.CharField(max_length=10, unique=True)
+    player_one = models.CharField(max_length=10)
+    player_two = models.CharField(max_length=10)
     player_one_score = models.IntegerField()
     player_two_score = models.IntegerField()
     time = models.DateTimeField()

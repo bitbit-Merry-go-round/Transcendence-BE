@@ -16,4 +16,6 @@ python manage.py makemigrations
 
 python manage.py migrate
 
+python add_game.py
+
 python manage.py runserver 0:${GAME_PORT}
