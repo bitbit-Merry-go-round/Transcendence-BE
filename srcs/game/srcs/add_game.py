@@ -102,7 +102,7 @@ tournament = Tournament(
     game_one=game1,
     game_two=game2,
     game_three=game3,
-    username="yham"
+    username="hyecheon"
 )
 tournament.save()
 
@@ -151,6 +151,6 @@ tournament = Tournament(
     game_one=game4,
     game_two=game5,
     game_three=game6,
-    username="yham"
+    username="hyecheon"
 )
 tournament.save()
