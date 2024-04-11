@@ -15,6 +15,8 @@ environ.Env.read_env()
 class OneOnOneGameAPIView(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
 
+    serializer_class = GameSerializer
+
     def get_serializer_context(self):
         context = super().get_serializer_context()
 
@@ -31,8 +33,4 @@ class OneOnOneGameAPIView(generics.ListCreateAPIView):
         queryset = Game.objects.filter(player_one=username)
         return queryset
 
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return GameSerializer
-
-    http_method_names = ['get', 'options']
+    http_method_names = ['get', 'post', 'options']
