@@ -1,6 +1,7 @@
 import environ
 import jwt
 from rest_framework import generics, status
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
@@ -8,6 +9,7 @@ from .models import Game, Tournament
 from .serializers import (
     GameSerializer,
     TournamentSerializer,
+    TournamentDetailSerializer,
     TournamentCreationSerializer,
 )
 
@@ -76,3 +78,18 @@ class TournamentAPIView(generics.ListCreateAPIView):
         return Response(request.data, status=status.HTTP_201_CREATED, headers=headers)
 
     http_method_names = ['get', 'post', 'options']
+
+
+class TournamentDetailAPIView(generics.RetrieveAPIView):
+    permission_classes = [AllowAny]
+
+    queryset = Tournament.objects.all()
+    serializer_class = TournamentDetailSerializer
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        id = self.kwargs["tournament_id"]
+        tournament = get_object_or_404(queryset, id=id)
+        return tournament
+
+    http_method_names = ['get', 'options']

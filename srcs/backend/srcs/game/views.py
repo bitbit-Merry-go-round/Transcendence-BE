@@ -1,3 +1,5 @@
+import re
+
 import requests
 import jwt
 import environ
@@ -38,6 +40,11 @@ class RouteGameView(APIView):
             game_path = "/game/" + username + "/1v1s/"
         if game_path == "/game/me/tournaments/":
             game_path = "/game/" + username + "/tournaments/"
+
+        pattern = re.compile("\/game\/me\/tournaments\/[0-9]*\/")
+        if pattern.match(game_path):
+            tournament_id = game_path.lstrip("/game/me/tournaments/")
+            game_path = "/game/" + username + "/tournaments/" + tournament_id
 
         game_url = f"{game_scheme}://{GAME_CONTAINER_HOST_NAME}:{game_port}{game_path}"
         query = request.META.get("QUERY_STRING")

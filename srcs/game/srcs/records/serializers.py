@@ -66,6 +66,16 @@ class TournamentSerializer(serializers.ModelSerializer):
         fields = ['id', 'winner', 'time']
 
 
+class TournamentDetailSerializer(serializers.ModelSerializer):
+    game_one = GameSerializer(read_only=True)
+    game_two = GameSerializer(read_only=True)
+    game_three = GameSerializer(read_only=True)
+
+    class Meta:
+        model = Tournament
+        fields = ['game_one', 'game_two', 'game_three']
+
+
 def validate_tournament_game(request_data, idx):
     win_score = 3
 
