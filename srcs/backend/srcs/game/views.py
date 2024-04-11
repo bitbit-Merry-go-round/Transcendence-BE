@@ -36,6 +36,8 @@ class RouteGameView(APIView):
 
         if game_path == "/game/me/1v1s/":
             game_path = "/game/" + username + "/1v1s/"
+        if game_path == "/game/me/tournaments/":
+            game_path = "/game/" + username + "/tournaments/"
 
         game_url = f"{game_scheme}://{GAME_CONTAINER_HOST_NAME}:{game_port}{game_path}"
         query = request.META.get("QUERY_STRING")

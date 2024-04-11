@@ -19,7 +19,7 @@ class Tournament(models.Model):
     game_one = models.ForeignKey(Game, related_name='game_one', on_delete=models.CASCADE)
     game_two = models.ForeignKey(Game, related_name='game_two', on_delete=models.CASCADE)
     game_three = models.ForeignKey(Game, related_name='game_three', on_delete=models.CASCADE)
-    username = models.CharField(max_length=10, unique=True)
+    username = models.CharField(max_length=10)
 
     class Meta:
         unique_together = ['game_one', 'game_two', 'game_three']

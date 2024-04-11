@@ -4,7 +4,7 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import Game
+from .models import Game, Tournament
 
 
 class GameSerializer(serializers.ModelSerializer):
@@ -38,3 +38,19 @@ class GameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         exclude = ['id', 'type']
+
+
+class TournamentSerializer(serializers.ModelSerializer):
+    winner = serializers.SerializerMethodField()
+    time = serializers.DateTimeField(source='game_three.time')
+
+    def get_winner(self, obj):
+        last_game = obj.game_three
+        if last_game.player_one_score > last_game.player_two_score:
+            return last_game.player_one
+        else:
+            return last_game.player_two
+
+    class Meta:
+        model = Tournament
+        fields = ['id', 'winner', 'time']

@@ -3,9 +3,10 @@ import jwt
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
 
-from .models import Game
+from .models import Game, Tournament
 from .serializers import (
     GameSerializer,
+    TournamentSerializer,
 )
 
 env = environ.Env()
@@ -30,7 +31,28 @@ class OneOnOneGameAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         username = self.kwargs["username"]
-        queryset = Game.objects.filter(player_one=username)
+        queryset = Game.objects.filter(player_one=username, type='1v1')
         return queryset
 
     http_method_names = ['get', 'post', 'options']
+
+
+class TournamentAPIView(generics.ListCreateAPIView):
+    permission_classes = [AllowAny]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["username"] = self.kwargs["username"]
+        return context
+
+    def get_queryset(self):
+        username = self.kwargs["username"]
+        print(Tournament.objects.all())
+        print(Game.objects.all())
+        queryset = Tournament.objects.filter(username=username)
+        print(queryset)
+        return queryset
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TournamentSerializer
