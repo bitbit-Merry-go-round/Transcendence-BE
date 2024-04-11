@@ -71,8 +71,11 @@ class RouteGameView(APIView):
         game_path = request.path
         game_port = env("GAME_PORT")
 
+        # TODO : me가 아닌 경우 예외처리
         if game_path == "/game/me/1v1s/":
             game_path = "/game/" + username + "/1v1s/"
+        elif game_path == "/game/me/tournaments/":
+            game_path = "/game/" + username + "/tournaments/"
 
         game_url = f"{game_scheme}://{GAME_CONTAINER_HOST_NAME}:{game_port}{game_path}"
         content_type = request.headers.get("Content-Type")

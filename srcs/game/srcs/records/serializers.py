@@ -20,8 +20,6 @@ class GameSerializer(serializers.ModelSerializer):
         player_two_score = request_data.get('player_two_score')
         time = request_data.get('time')
 
-        print(player_one)
-        print(player_two)
         if player_one != auth_user or player_two != "guest":
             raise ValidationError("invalid players")
         if player_one_score != win_score and player_two_score != win_score:
@@ -54,3 +52,103 @@ class TournamentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tournament
         fields = ['id', 'winner', 'time']
+
+
+def validate_tournament_game(request_data, idx):
+    win_score = 3
+
+    player_one = request_data[idx]['player_one']
+    player_two = request_data[idx]['player_two']
+    player_one_score = request_data[idx]['player_one_score']
+    player_two_score = request_data[idx]['player_two_score']
+    time = request_data[idx]['time']
+
+    if player_one == player_two:
+        raise ValidationError("identical players")
+    if player_one_score != win_score and player_two_score != win_score:
+        raise ValidationError("invalid player scores")
+
+    time = datetime.strptime(time, "%Y/%m/%d %H:%M:%S")
+    time = timezone.make_aware(time)
+    now = timezone.now()
+    if now < time:
+        raise ValidationError("invalid time")
+
+
+def create_tournament_game(request_data, idx):
+    player_one = request_data[idx]['player_one']
+    player_two = request_data[idx]['player_two']
+    player_one_score = request_data[idx]['player_one_score']
+    player_two_score = request_data[idx]['player_two_score']
+    time = request_data[idx]['time']
+    time = datetime.strptime(time, "%Y/%m/%d %H:%M:%S")
+    aware_datetime = timezone.make_aware(time)
+
+    game = Game.objects.create(
+        player_one=player_one,
+        player_two=player_two,
+        player_one_score=player_one_score,
+        player_two_score=player_two_score,
+        time=aware_datetime,
+        type='tournament'
+    )
+
+    return game
+
+
+def get_game_winner(request_data, idx):
+    player_one_score = request_data[idx]['player_one_score']
+    player_two_score = request_data[idx]['player_two_score']
+
+    if player_one_score > player_two_score:
+        return request_data[idx]['player_one']
+    else:
+        return request_data[idx]['player_two']
+
+
+class TournamentCreationSerializer(serializers.ModelSerializer):
+    game_one = GameSerializer(read_only=True)
+    game_two = GameSerializer(read_only=True)
+    game_three = GameSerializer(read_only=True)
+
+    def validate(self, data):
+        request_data = self.context['request'].data
+
+        validate_tournament_game(request_data, 0)
+        validate_tournament_game(request_data, 1)
+        validate_tournament_game(request_data, 2)
+
+        game_one_time = request_data[0]['time']
+        game_two_time = request_data[1]['time']
+        game_three_time = request_data[2]['time']
+
+        if game_one_time >= game_two_time or game_two_time >= game_three_time:
+            raise ValidationError("invalid game times")
+
+        winner_one = get_game_winner(request_data, 0)
+        winner_two = get_game_winner(request_data, 1)
+        if request_data[2]['player_one'] != winner_one or request_data[2]['player_two'] != winner_two:
+            raise ValidationError("invalid game players")
+
+        return data
+
+    def create(self, validated_data):
+        username = self.context['username']
+        request_data = self.context['request'].data
+
+        game_one = create_tournament_game(request_data, 0)
+        game_two = create_tournament_game(request_data, 1)
+        game_three = create_tournament_game(request_data, 2)
+
+        tournament = Tournament.objects.create(
+            game_one=game_one,
+            game_two=game_two,
+            game_three=game_three,
+            username=username
+        )
+
+        return tournament
+
+    class Meta:
+        model = Tournament
+        fields = ['game_one', 'game_two', 'game_three']
