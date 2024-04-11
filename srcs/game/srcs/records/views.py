@@ -1,9 +1,8 @@
 import environ
 import jwt
-from rest_framework import generics, status
+from rest_framework import generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 
 from .models import Game, Tournament
 from .serializers import (
@@ -66,16 +65,6 @@ class TournamentAPIView(generics.ListCreateAPIView):
             return TournamentSerializer
         if self.request.method == 'POST':
             return TournamentCreationSerializer
-
-    def create(self, request, *args, **kwargs):
-        data = convert_to_dict(request.data)
-
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-
-        return Response(request.data, status=status.HTTP_201_CREATED, headers=headers)
 
     http_method_names = ['get', 'post', 'options']
 
