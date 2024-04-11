@@ -9,10 +9,11 @@ class Game(models.Model):
     player_one_score = models.IntegerField()
     player_two_score = models.IntegerField()
     time = models.DateTimeField()
-    type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='1V1')
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='1v1')
 
     class Meta:
         app_label = "records"
+        unique_together = ['player_one', 'player_two', 'time', 'type']
 
 
 class Tournament(models.Model):

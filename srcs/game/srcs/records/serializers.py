@@ -31,6 +31,18 @@ class GameSerializer(serializers.ModelSerializer):
         if now < time:
             raise ValidationError("invalid time")
 
+        game = Game.objects.filter(
+            player_one=player_one,
+            player_two=player_two,
+            player_one_score=player_one_score,
+            player_two_score=player_two_score,
+            time=time,
+            type='1v1'
+        ).first()
+
+        if game is not None:
+            raise ValidationError("duplicate game")
+
         return data
 
     class Meta:
@@ -82,18 +94,29 @@ def create_tournament_game(request_data, idx):
     player_two_score = request_data[idx]['player_two_score']
     time = request_data[idx]['time']
     time = datetime.strptime(time, "%Y/%m/%d %H:%M:%S")
-    aware_datetime = timezone.make_aware(time)
+    time = timezone.make_aware(time)
 
-    game = Game.objects.create(
+    game = Game.objects.filter(
         player_one=player_one,
         player_two=player_two,
         player_one_score=player_one_score,
         player_two_score=player_two_score,
-        time=aware_datetime,
+        time=time,
         type='tournament'
-    )
+    ).first()
 
-    return game
+    if game is None:
+        return Game.objects.create(
+            player_one=player_one,
+            player_two=player_two,
+            player_one_score=player_one_score,
+            player_two_score=player_two_score,
+            time=time,
+            type='tournament'
+        )
+
+    else:
+        return game
 
 
 def get_game_winner(request_data, idx):
@@ -112,6 +135,7 @@ class TournamentCreationSerializer(serializers.ModelSerializer):
     game_three = GameSerializer(read_only=True)
 
     def validate(self, data):
+        username = self.context['username']
         request_data = self.context['request'].data
 
         validate_tournament_game(request_data, 0)
@@ -129,6 +153,20 @@ class TournamentCreationSerializer(serializers.ModelSerializer):
         winner_two = get_game_winner(request_data, 1)
         if request_data[2]['player_one'] != winner_one or request_data[2]['player_two'] != winner_two:
             raise ValidationError("invalid game players")
+
+        game_one = create_tournament_game(request_data, 0)
+        game_two = create_tournament_game(request_data, 1)
+        game_three = create_tournament_game(request_data, 2)
+
+        tournament = Tournament.objects.filter(
+            game_one=game_one,
+            game_two=game_two,
+            game_three=game_three,
+            username=username
+        ).first()
+
+        if tournament is not None:
+            raise ValidationError("duplicate tournament")
 
         return data
 
