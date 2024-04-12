@@ -3,6 +3,7 @@ import jwt
 from rest_framework import generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from .models import User, Friend
 from .serializers import (
@@ -39,6 +40,30 @@ class MyProfileAPIView(generics.RetrieveUpdateAPIView):
             return MyProfileSerializer
         if self.request.method == 'PATCH':
             return MyProfileUpdateSerializer
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        wins = request.data.pop('wins', None)
+        loses = request.data.pop('loses', None)
+
+        data = request.data
+        if wins is not None:
+            data['wins'] = wins + instance.wins
+        if loses is not None:
+            data['loses'] = loses + instance.loses
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
 
     http_method_names = ['get', 'patch', 'options']
 

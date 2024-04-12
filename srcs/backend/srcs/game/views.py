@@ -1,3 +1,5 @@
+import json
+
 import requests
 import environ
 from django.http import HttpResponse, JsonResponse
@@ -9,6 +11,7 @@ from rest_framework.views import APIView
 env = environ.Env()
 environ.Env.read_env()
 GAME_CONTAINER_HOST_NAME = "game"
+USER_MANAGER_HOST_NAME = "user-manager"
 
 
 class RouteGameView(APIView):
@@ -70,6 +73,31 @@ class RouteGameView(APIView):
                 "Content-Type": content_type
             }
         )
+
+        if response.status_code == 201:
+            user_manager_scheme = request.scheme
+            user_manager_port = env("USER_MANAGER_PORT")
+            user_manager_path = "/users/me/profile/"
+
+            user_profile_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
+
+            my_score = json.loads(request.body)["player_one_score"]
+            if my_score == 3:
+                data = {"wins": 1}
+            else:
+                data = {"loses": 1}
+            json_data = json.dumps(data)
+
+            token = request.headers.get("Authorization")
+            bearer, _, token = token.partition(' ')
+            user_profile_response = requests.patch(
+                user_profile_url,
+                data=json_data,
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json"
+                }
+            )
 
         return HttpResponse(
             content=response.content,
