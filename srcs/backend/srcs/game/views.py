@@ -74,7 +74,7 @@ class RouteGameView(APIView):
             }
         )
 
-        if response.status_code == 201:
+        if response.status_code == 201 and game_path == "/game/me/1v1s/":
             user_manager_scheme = request.scheme
             user_manager_port = env("USER_MANAGER_PORT")
             user_manager_path = "/users/me/profile/"
