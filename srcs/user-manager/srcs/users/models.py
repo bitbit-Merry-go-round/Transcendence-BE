@@ -10,7 +10,7 @@ def get_default_avatar(image_path):
 
 
 class User(models.Model):
-    STATUS_CHOICES = (('OFFLINE', 'Offline'), ('ONLINE', 'Online'), ('GAMING', 'Gaming'))
+    STATUS_CHOICES = (('OFFLINE', 'Offline'), ('ONLINE', 'Online'))
 
     username = models.CharField(max_length=10, unique=True)
     avatar = models.BinaryField(default=get_default_avatar('static/avatar.jpg'))

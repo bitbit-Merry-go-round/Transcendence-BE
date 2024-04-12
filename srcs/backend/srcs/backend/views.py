@@ -1,3 +1,5 @@
+import json
+import environ
 import requests
 from django.conf import settings
 from django.http import JsonResponse
@@ -10,6 +12,10 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenBlacklistView
 from users.models import User
 from users.utils import generate_otp, send_otp_email
+
+env = environ.Env()
+environ.Env.read_env()
+USER_MANAGER_HOST_NAME = "user-manager"
 
 
 class OtpValidationAPIView(APIView):
@@ -41,6 +47,24 @@ class OtpValidationAPIView(APIView):
             token = RefreshToken.for_user(user)
             refresh = str(token)
             access = str(token.access_token)
+
+            user_manager_scheme = request.scheme
+            user_manager_port = env("USER_MANAGER_PORT")
+            user_manager_path = "/users/me/profile/"
+
+            user_profile_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
+
+            data = {"status": "ONLINE"}
+            json_data = json.dumps(data)
+
+            response = requests.patch(
+                user_profile_url,
+                data=json_data,
+                headers={
+                    "Authorization": f"Bearer {access}",
+                    "Content-Type": "application/json"
+                }
+            )
 
             return JsonResponse({
                 'access': access,
@@ -134,6 +158,26 @@ class LogoutAPIView(TokenBlacklistView):
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
             raise InvalidToken(e.args[0])
+
+        user_manager_scheme = request.scheme
+        user_manager_port = env("USER_MANAGER_PORT")
+        user_manager_path = "/users/me/profile/"
+
+        user_profile_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
+
+        data = {"status": "OFFLINE"}
+        json_data = json.dumps(data)
+
+        token = request.headers.get("Authorization")
+        bearer, _, token = token.partition(' ')
+        response = requests.patch(
+            user_profile_url,
+            data=json_data,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json"
+            }
+        )
 
         return JsonResponse({
             "detail": "logout success"
