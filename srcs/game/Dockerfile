@@ -26,4 +26,3 @@ RUN pip install --upgrade pip
 RUN pip install -r /home/requirements.txt
 
 ENTRYPOINT ["dumb-init", "--", "/home/run_game.sh" ]
-# docker compose run -it 컨테이너 이름 sh -> startproject game -> 다시 나가서 진입점 풀고 시작.
