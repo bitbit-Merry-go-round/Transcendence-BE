@@ -1,7 +1,4 @@
-import re
-
 import requests
-import jwt
 import environ
 from django.http import HttpResponse, JsonResponse
 from rest_framework import status
@@ -28,18 +25,9 @@ class RouteGameView(APIView):
                 "detail": "invalid access token"
             }, status=status.HTTP_401_UNAUTHORIZED)
 
-        bearer, _, token = token.partition(' ')
-        payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
-        username = payload.get("user_id")
-
         game_scheme = request.scheme
         game_path = request.path
         game_port = env("GAME_PORT")
-
-        if game_path == "/game/me/1v1s/":
-            game_path = "/game/" + username + "/1v1s/"
-        if game_path == "/game/me/tournaments/":
-            game_path = "/game/" + username + "/tournaments/"
 
         game_url = f"{game_scheme}://{GAME_CONTAINER_HOST_NAME}:{game_port}{game_path}"
         query = request.META.get("QUERY_STRING")
@@ -47,6 +35,7 @@ class RouteGameView(APIView):
         if query != "":
             game_url = game_url + f"?{query}"
 
+        bearer, _, token = token.partition(' ')
         response = requests.get(
             game_url,
             headers={"Authorization": f"Bearer {token}"}
@@ -65,23 +54,14 @@ class RouteGameView(APIView):
                 "detail": "invalid access token"
             }, status=status.HTTP_401_UNAUTHORIZED)
 
-        bearer, _, token = token.partition(' ')
-        payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
-        username = payload.get("user_id")
-
         game_scheme = request.scheme
         game_path = request.path
         game_port = env("GAME_PORT")
 
-        # TODO : me가 아닌 경우 예외처리
-        if game_path == "/game/me/1v1s/":
-            game_path = "/game/" + username + "/1v1s/"
-        elif game_path == "/game/me/tournaments/":
-            game_path = "/game/" + username + "/tournaments/"
-
         game_url = f"{game_scheme}://{GAME_CONTAINER_HOST_NAME}:{game_port}{game_path}"
         content_type = request.headers.get("Content-Type")
 
+        bearer, _, token = token.partition(' ')
         response = requests.post(
             game_url,
             data=request.body,
