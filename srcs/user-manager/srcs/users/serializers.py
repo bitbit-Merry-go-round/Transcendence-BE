@@ -49,8 +49,8 @@ class MyProfileUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['message', 'avatar']
-        read_only_fields = ['username', 'status', 'wins', 'loses']
+        fields = ['message', 'avatar', 'status']
+        read_only_fields = ['username', 'wins', 'loses']
 
 
 class MyFriendSerializer(serializers.ModelSerializer):
