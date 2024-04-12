@@ -10,4 +10,5 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
     path('logout/', LogoutAPIView.as_view(), name='logout'),
     path('users/', include('users.urls')),
+    path('game/', include('game.urls')),
 ]
