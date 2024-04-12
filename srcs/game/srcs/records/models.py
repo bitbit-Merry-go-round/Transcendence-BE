@@ -23,4 +23,4 @@ class Tournament(models.Model):
     username = models.CharField(max_length=10)
 
     class Meta:
-        unique_together = ['game_one', 'game_two', 'game_three']
+        unique_together = ['game_one', 'game_two', 'game_three', 'username']
