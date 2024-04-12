@@ -36,8 +36,10 @@ class RouteToUserManagerAPIView(APIView):
         user_manager_port = env("USER_MANAGER_PORT")
         user_manager_path = request.path
 
-        if "me" in user_manager_path:
-            user_manager_path = user_manager_path.replace("me", username)
+        if user_manager_path == "/users/me/profile/":
+            user_manager_path = "/users/" + username + "/profile/"
+        if user_manager_path == "/users/me/friends/":
+            user_manager_path = "/users/" + username + "/friends/"
 
         user_manager_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
 
@@ -48,6 +50,11 @@ class RouteToUserManagerAPIView(APIView):
             user_manager_url,
             headers={"Authorization": f"Bearer {token}"}
         )
+
+        if response.status_code == 404:
+            return JsonResponse({
+                "detail": "invalid request path"
+            }, status=response.status_code)
 
         return HttpResponse(
             content=response.content,
