@@ -5,10 +5,10 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('42/callback/', fourtytwo_callback, name='42-callback'),
-    path('validate-otp/', OtpValidationAPIView.as_view(), name='validate-otp'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
-    path('logout/', LogoutAPIView.as_view(), name='logout'),
-    path('users/', include('users.urls')),
-    path('game/', include('game.urls')),
+    path('api/42/callback/', fourtytwo_callback, name='42-callback'),
+    path('api/validate-otp/', OtpValidationAPIView.as_view(), name='validate-otp'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
+    path('api/logout/', LogoutAPIView.as_view(), name='logout'),
+    path('api/users/', include('users.urls')),
+    path('api/game/', include('game.urls')),
 ]

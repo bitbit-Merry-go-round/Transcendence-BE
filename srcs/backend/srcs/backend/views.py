@@ -37,7 +37,7 @@ class OtpValidationAPIView(APIView):
             user.email_verified = True
             user.save()
             response = requests.post(
-                f"http://user-manager:8001/users/create/",
+                f"http://user-manager:8001/api/users/create/",
                 json={
                     "username": user.username,
                     "email": user.email
@@ -50,7 +50,7 @@ class OtpValidationAPIView(APIView):
 
             user_manager_scheme = request.scheme
             user_manager_port = env("USER_MANAGER_PORT")
-            user_manager_path = "/users/me/profile/"
+            user_manager_path = "/api/users/me/profile/"
 
             user_profile_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
 
@@ -77,16 +77,16 @@ class OtpValidationAPIView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-FOURTYTWO_CALLBACK_URI = 'http%3A%2F%2F127.0.0.1%3A8080%2Flogin'
 
 
 def fourtytwo_callback(request):
     client_id = settings.FOURTYTWO_CLIENT_ID
     client_secret = settings.FOURTYTWO_CLIENT_SECRET
+    redirect_uri = settings.FOURTYTWO_REDIRECT_URI
     code = request.GET.get("code")
 
     token_response = requests.post(
-        f"https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&code={code}&redirect_uri={FOURTYTWO_CALLBACK_URI}"
+        f"https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&code={code}&redirect_uri={redirect_uri}"
     )
     response_status = token_response.status_code
     token_response_json = token_response.json()
@@ -161,7 +161,7 @@ class LogoutAPIView(TokenBlacklistView):
 
         user_manager_scheme = request.scheme
         user_manager_port = env("USER_MANAGER_PORT")
-        user_manager_path = "/users/me/profile/"
+        user_manager_path = "/api/users/me/profile/"
 
         user_profile_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
 
