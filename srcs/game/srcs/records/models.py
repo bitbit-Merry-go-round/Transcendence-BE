@@ -13,7 +13,7 @@ class Game(models.Model):
 
     class Meta:
         app_label = "records"
-        unique_together = ['player_one', 'player_two', 'time', 'type']
+        unique_together = ['player_one', 'player_two', 'player_one_score', 'player_two_score', 'time', 'type']
 
 
 class Tournament(models.Model):

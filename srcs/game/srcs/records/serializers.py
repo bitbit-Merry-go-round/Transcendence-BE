@@ -81,23 +81,29 @@ class TournamentDetailSerializer(serializers.ModelSerializer):
 def validate_tournament_game(request_data, idx):
     win_score = 3
 
-    player_one = request_data[idx]['player_one']
-    player_two = request_data[idx]['player_two']
-    player_one_score = request_data[idx]['player_one_score']
-    player_two_score = request_data[idx]['player_two_score']
-    time = request_data[idx]['time']
+    try:
+        player_one = request_data[idx]['player_one']
+        player_two = request_data[idx]['player_two']
+        player_one_score = request_data[idx]['player_one_score']
+        player_two_score = request_data[idx]['player_two_score']
+        time = request_data[idx]['time']
+    except:
+        raise ValidationError("invalid request body")
 
     if player_one == player_two:
         raise ValidationError("identical players")
-    if (player_one_score != win_score and
-            player_two_score != win_score):
+    if (not (player_one_score == win_score and player_two_score < win_score) and
+            not (player_two_score == win_score and player_one_score < win_score)):
         raise ValidationError("invalid player scores")
 
-    time = datetime.strptime(time, "%Y/%m/%d %H:%M:%S")
-    time = timezone.make_aware(time)
-    now = timezone.now()
-    if now < time:
-        raise ValidationError("invalid time")
+    try:
+        time = datetime.strptime(time, "%Y/%m/%d %H:%M:%S")
+        time = timezone.make_aware(time)
+        now = timezone.now()
+        if now < time:
+            raise ValidationError("invalid time")
+    except:
+        raise ValidationError("invalid time format")
 
 
 def create_tournament_game(request_data, idx):
