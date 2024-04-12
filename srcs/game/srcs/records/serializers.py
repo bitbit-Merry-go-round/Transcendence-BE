@@ -28,6 +28,8 @@ class MyGameSerializer(serializers.ModelSerializer):
         if (not (player_one_score == win_score and player_two_score < win_score) and
                 not (player_two_score == win_score and player_one_score < win_score)):
             raise ValidationError("invalid player scores")
+        if player_one_score < 0 or player_two_score < 0:
+            raise ValidationError("invalid player scores")
 
         try:
             time = datetime.strptime(time, "%Y/%m/%d %H:%M:%S")
@@ -95,6 +97,8 @@ def validate_tournament_game(request_data, idx):
         raise ValidationError("identical players")
     if (not (player_one_score == win_score and player_two_score < win_score) and
             not (player_two_score == win_score and player_one_score < win_score)):
+        raise ValidationError("invalid player scores")
+    if player_one_score < 0 or player_two_score < 0:
         raise ValidationError("invalid player scores")
 
     try:
