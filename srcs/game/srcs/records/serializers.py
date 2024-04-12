@@ -7,11 +7,11 @@ from rest_framework.exceptions import ValidationError
 from .models import Game, Tournament
 
 
-class GameSerializer(serializers.ModelSerializer):
+class MyGameSerializer(serializers.ModelSerializer):
     def validate(self, data):
         win_score = 3
 
-        auth_user = self.context['auth_user']
+        me = self.context['me']
         request_data = self.context['request'].data
 
         try:
@@ -23,7 +23,7 @@ class GameSerializer(serializers.ModelSerializer):
         except:
             raise ValidationError("invalid request body")
 
-        if player_one != auth_user or player_two != "guest":
+        if player_one != me or player_two != "guest":
             raise ValidationError("invalid players")
         if (not (player_one_score == win_score and player_two_score < win_score) and
                 not (player_two_score == win_score and player_one_score < win_score)):
@@ -57,7 +57,13 @@ class GameSerializer(serializers.ModelSerializer):
         exclude = ['id', 'type']
 
 
-class TournamentSerializer(serializers.ModelSerializer):
+class GameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Game
+        exclude = ['id', 'type']
+
+
+class TournamentSimpleSerializer(serializers.ModelSerializer):
     winner = serializers.SerializerMethodField()
     time = serializers.DateTimeField(source='game_three.time')
 
@@ -71,16 +77,6 @@ class TournamentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tournament
         fields = ['id', 'winner', 'time']
-
-
-class TournamentDetailSerializer(serializers.ModelSerializer):
-    game_one = GameSerializer(read_only=True)
-    game_two = GameSerializer(read_only=True)
-    game_three = GameSerializer(read_only=True)
-
-    class Meta:
-        model = Tournament
-        fields = ['game_one', 'game_two', 'game_three']
 
 
 def validate_tournament_game(request_data, idx):
@@ -153,13 +149,13 @@ def get_game_winner(request_data, idx):
         return request_data[idx]['player_two']
 
 
-class TournamentCreationSerializer(serializers.ModelSerializer):
+class TournamentDetailSerializer(serializers.ModelSerializer):
     game_one = GameSerializer(read_only=True)
     game_two = GameSerializer(read_only=True)
     game_three = GameSerializer(read_only=True)
 
     def validate(self, data):
-        username = self.context['username']
+        me = self.context['me']
         request_data = self.context['request'].data
 
         validate_tournament_game(request_data, 'game_one')
@@ -188,7 +184,7 @@ class TournamentCreationSerializer(serializers.ModelSerializer):
             game_one=game_one,
             game_two=game_two,
             game_three=game_three,
-            username=username
+            username=me
         ).first()
 
         if tournament is not None:
@@ -197,7 +193,7 @@ class TournamentCreationSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        username = self.context['username']
+        me = self.context['me']
         request_data = self.context['request'].data
 
         game_one = create_tournament_game(request_data, 'game_one')
@@ -208,7 +204,7 @@ class TournamentCreationSerializer(serializers.ModelSerializer):
             game_one=game_one,
             game_two=game_two,
             game_three=game_three,
-            username=username
+            username=me
         )
 
         return tournament
