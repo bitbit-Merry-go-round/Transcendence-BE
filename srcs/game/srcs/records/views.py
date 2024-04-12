@@ -40,13 +40,6 @@ class OneOnOneGameAPIView(generics.ListCreateAPIView):
     http_method_names = ['get', 'post', 'options']
 
 
-def convert_to_dict(lst):
-    res_dict = {}
-    for i in range(len(lst)):
-        res_dict[i] = lst[i]
-    return res_dict
-
-
 class TournamentAPIView(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
 
