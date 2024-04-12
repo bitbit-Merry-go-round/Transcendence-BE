@@ -1,5 +1,4 @@
 import requests
-import jwt
 import environ
 from django.http import HttpResponse, JsonResponse
 from rest_framework import status
