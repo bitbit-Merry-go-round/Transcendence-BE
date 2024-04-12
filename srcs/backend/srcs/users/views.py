@@ -132,3 +132,5 @@ class RouteToUserManagerAPIView(APIView):
             status=response.status_code,
             headers=response.headers
         )
+
+    http_method_names = ['get', 'patch', 'post', 'delete', 'options']
