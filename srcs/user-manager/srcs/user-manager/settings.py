@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 
     # 설치한 라이브러리
     'rest_framework',
+    'sslserver',
 ]
 
 REST_FRAMEWORK = {

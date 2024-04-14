@@ -41,7 +41,8 @@ class RouteGameView(APIView):
         bearer, _, token = token.partition(' ')
         response = requests.get(
             game_url,
-            headers={"Authorization": f"Bearer {token}"}
+            headers={"Authorization": f"Bearer {token}"}, 
+            verify=False
         )
 
         return HttpResponse(
@@ -71,7 +72,7 @@ class RouteGameView(APIView):
             headers={
                 "Authorization": f"Bearer {token}",
                 "Content-Type": content_type
-            }
+            }, verify=False
         )
 
         if response.status_code == 201 and game_path == "/api/game/me/1v1s/":
@@ -96,7 +97,7 @@ class RouteGameView(APIView):
                 headers={
                     "Authorization": f"Bearer {token}",
                     "Content-Type": "application/json"
-                }
+                }, verify=False
             )
 
         return HttpResponse(
