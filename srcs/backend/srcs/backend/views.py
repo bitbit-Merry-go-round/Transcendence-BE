@@ -37,11 +37,12 @@ class OtpValidationAPIView(APIView):
             user.email_verified = True
             user.save()
             response = requests.post(
-                f"http://user-manager:8001/api/users/create/",
+                f"https://user-manager:8001/api/users/create/",
                 json={
                     "username": user.username,
                     "email": user.email
-                }
+                }, 
+                verify=False
             )
 
             token = RefreshToken.for_user(user)
@@ -63,7 +64,7 @@ class OtpValidationAPIView(APIView):
                 headers={
                     "Authorization": f"Bearer {access}",
                     "Content-Type": "application/json"
-                }
+                }, verify=False
             )
 
             return JsonResponse({
@@ -87,7 +88,7 @@ def fourtytwo_callback(request):
 
     token_response = requests.post(
         f"https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&code={code}&redirect_uri={redirect_uri}"
-    )
+    , verify=False)
     response_status = token_response.status_code
     token_response_json = token_response.json()
 
@@ -101,7 +102,7 @@ def fourtytwo_callback(request):
 
     profile_response = requests.get(
         "https://api.intra.42.fr/v2/me",
-        headers={"Authorization": f"Bearer {access_token}"},
+        headers={"Authorization": f"Bearer {access_token}"}, verify=False
     )
     response_status = profile_response.status_code
 
@@ -176,7 +177,7 @@ class LogoutAPIView(TokenBlacklistView):
             headers={
                 "Authorization": f"Bearer {token}",
                 "Content-Type": "application/json"
-            }
+            }, verify=False
         )
 
         return JsonResponse({

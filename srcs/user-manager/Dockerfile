@@ -3,6 +3,7 @@ FROM python:3.12-alpine
 RUN mkdir -p /var/www/django
 
 ARG DOMAIN=domain
+ARG SSL_PATH=/etc/ssl/private
 
 #set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -24,5 +25,10 @@ RUN apk update && \
 
 RUN pip install --upgrade pip
 RUN pip install -r /home/requirements.txt
+
+RUN openssl genrsa -out ${SSL_PATH}/${DOMAIN}.key 2048 && \
+   openssl req -new -key ${SSL_PATH}/${DOMAIN}.key -out ${SSL_PATH}/${DOMAIN}.crt \
+   -subj "/C=KR/ST=Seoul/L=Gaepodong/O=42seoul/OU=Cadet/CN=${DOMAIN}" && \
+   openssl x509 -req -days 1000 -in ${SSL_PATH}/${DOMAIN}.crt -signkey ${SSL_PATH}/${DOMAIN}.key -out ${SSL_PATH}/${DOMAIN}.crt
 
 ENTRYPOINT ["dumb-init", "--", "/home/run_user_manager.sh" ]

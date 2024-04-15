@@ -26,21 +26,9 @@ RUN apk update && \
 RUN pip install --upgrade pip
 RUN pip install -r /home/requirements.txt
 
-#RUN pip install --upgrade pip \
-#    pip install django \
-#    django-environ \
-#    djangorestframework \
-#    djangorestframework-simplejwt \
-#    django-sslserver \
-#    django-filter \
-#    psycopg2-binary \
-#    django-extensions \
-#    drf-spectacular \
-#    django-dotenv
-
-#RUN openssl genrsa -out ${SSL_PATH}/${DOMAIN}.key 2048 && \
-#    openssl req -new -key ${SSL_PATH}/${DOMAIN}.key -out ${SSL_PATH}/${DOMAIN}.crt \
-#    -subj "/C=KR/ST=Seoul/L=Gaepodong/O=42seoul/OU=Cadet/CN=${DOMAIN}" && \
-#    openssl x509 -req -days 1000 -in ${SSL_PATH}/${DOMAIN}.crt -signkey ${SSL_PATH}/${DOMAIN}.key -out ${SSL_PATH}/${DOMAIN}.crt
+RUN openssl genrsa -out ${SSL_PATH}/${DOMAIN}.key 2048 && \
+   openssl req -new -key ${SSL_PATH}/${DOMAIN}.key -out ${SSL_PATH}/${DOMAIN}.crt \
+   -subj "/C=KR/ST=Seoul/L=Gaepodong/O=42seoul/OU=Cadet/CN=${DOMAIN}" && \
+   openssl x509 -req -days 1000 -in ${SSL_PATH}/${DOMAIN}.crt -signkey ${SSL_PATH}/${DOMAIN}.key -out ${SSL_PATH}/${DOMAIN}.crt
 
 ENTRYPOINT ["dumb-init", "--", "/home/run_backend.sh" ]

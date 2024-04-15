@@ -38,7 +38,8 @@ class RouteToUserManagerAPIView(APIView):
         bearer, _, token = token.partition(' ')
         response = requests.get(
             user_manager_url,
-            headers={"Authorization": f"Bearer {token}"}
+            headers={"Authorization": f"Bearer {token}"}, 
+            verify=False
         )
 
         return HttpResponse(
@@ -68,7 +69,7 @@ class RouteToUserManagerAPIView(APIView):
             headers={
                 "Authorization": f"Bearer {token}",
                 "Content-Type": content_type
-            }
+            }, verify=False
         )
 
         return HttpResponse(
@@ -98,7 +99,7 @@ class RouteToUserManagerAPIView(APIView):
             headers={
                 "Authorization": f"Bearer {token}",
                 "Content-Type": content_type
-            }
+            }, verify=False
         )
 
         return HttpResponse(
@@ -123,7 +124,7 @@ class RouteToUserManagerAPIView(APIView):
         bearer, _, token = token.partition(' ')
         response = requests.delete(
             user_manager_url,
-            headers={"Authorization": f"Bearer {token}"}
+            headers={"Authorization": f"Bearer {token}"}, verify=False
         )
 
         return HttpResponse(

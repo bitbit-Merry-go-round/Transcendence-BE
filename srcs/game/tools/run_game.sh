@@ -18,4 +18,4 @@ python manage.py migrate
 
 python add_game.py
 
-python manage.py runserver 0:${GAME_PORT}
+python manage.py runsslserver --certificate /etc/ssl/private/domain.crt --key /etc/ssl/private/domain.key 0:${GAME_PORT}
