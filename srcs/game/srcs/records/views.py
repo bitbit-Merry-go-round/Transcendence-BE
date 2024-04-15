@@ -38,7 +38,7 @@ class MyOneOnOneGameAPIView(generics.ListCreateAPIView):
         payload = jwt.decode(jwt=token, key=env("SECRET_KEY"), algorithms=['HS256'])
 
         me = payload.get("user_id")
-        queryset = Game.objects.filter(player_one=me, player_two="guest", type='1v1')
+        queryset = Game.objects.filter(player_one=me, player_two="guest", type='1v1').order_by("time")
 
         return queryset
 
