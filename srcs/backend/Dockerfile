@@ -3,7 +3,7 @@ FROM python:3.12-alpine
 RUN mkdir -p /var/www/django
 
 ARG SSL_PATH=/etc/ssl/private
-ARG DOMAIN=domain
+ARG DOMAIN=fresh_pong
 
 #set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
