@@ -21,4 +21,4 @@ python manage.py migrate
 
 python add_user.py
 
-python manage.py runsslserver --certificate /etc/ssl/private/domain.crt --key /etc/ssl/private/domain.key 0:${USERS_PORT}
+python manage.py runsslserver --certificate /etc/ssl/private/fresh_pong.crt --key /etc/ssl/private/fresh_pong.key 0:${USERS_PORT}
