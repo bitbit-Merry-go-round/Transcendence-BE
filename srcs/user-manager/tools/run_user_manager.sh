@@ -19,6 +19,4 @@ python manage.py makemigrations
 
 python manage.py migrate
 
-python add_user.py
-
 python manage.py runsslserver --certificate /etc/ssl/private/fresh_pong.crt --key /etc/ssl/private/fresh_pong.key 0:${USERS_PORT}
