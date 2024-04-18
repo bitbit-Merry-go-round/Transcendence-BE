@@ -1,74 +1,133 @@
-from rest_framework import generics
-from rest_framework.decorators import api_view
-from rest_framework.generics import get_object_or_404
-from rest_framework.response import Response
+import requests
+import environ
+from django.http import HttpResponse, JsonResponse
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.views import APIView
 
-from .models import User, Friend
-from .serializers import (
-    UserInitSerializer,
-    UserDetailSerializer,
-    UserUpdateSerializer,
-    FriendListSerializer,
-    FriendSerializer
-)
+env = environ.Env()
+environ.Env.read_env()
+USER_MANAGER_HOST_NAME = "user-manager"
 
 
-@api_view(['GET'])
-def HelloAPI(request):
-    return Response("Hello!")
+class RouteToUserManagerAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
+    def get(self, request):
+        token = request.headers.get("Authorization")
+        if token is None:
+            return JsonResponse({
+                "detail": "invalid access token"
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
-class UserCreationAPI(generics.ListCreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserInitSerializer
-    http_method_names = ['post']
+        user_manager_scheme = request.scheme
+        user_manager_port = env("USER_MANAGER_PORT")
+        user_manager_path = request.path
 
+        user_manager_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
 
-class UserProfileAPI(generics.RetrieveUpdateAPIView):
-    queryset = User.objects.all()
+        query = request.META.get("QUERY_STRING")
+        if query != "":
+            user_manager_url = user_manager_url + f"?{query}"
 
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return UserDetailSerializer
-        if self.request.method == 'PATCH':
-            return UserUpdateSerializer
+        bearer, _, token = token.partition(' ')
+        response = requests.get(
+            user_manager_url,
+            headers={"Authorization": f"Bearer {token}"}, 
+            verify=False
+        )
 
-    http_method_names = ['get', 'patch']
+        return HttpResponse(
+            content=response.content,
+            status=response.status_code,
+            headers=response.headers
+        )
 
+    def patch(self, request):
+        token = request.headers.get("Authorization")
+        if token is None:
+            return JsonResponse({
+                "detail": "invalid access token"
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
-class FriendListAPI(generics.ListCreateAPIView):
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['from_user'] = self.kwargs['from_user']
-        return context
+        user_manager_scheme = request.scheme
+        user_manager_port = env("USER_MANAGER_PORT")
+        user_manager_path = request.path
 
-    def get_queryset(self):
-        from_user = self.kwargs['from_user']
-        queryset = Friend.objects.filter(from_user=from_user)
-        return queryset
+        user_manager_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
+        content_type = request.headers.get("Content-Type")
 
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return FriendListSerializer
-        if self.request.method == 'POST':
-            return FriendSerializer
+        bearer, _, token = token.partition(' ')
+        response = requests.patch(
+            user_manager_url,
+            data=request.body,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": content_type
+            }, verify=False
+        )
 
-    http_method_names = ['get', 'post']
+        return HttpResponse(
+            content=response.content,
+            status=response.status_code,
+            headers=response.headers
+        )
 
+    def post(self, request):
+        token = request.headers.get("Authorization")
+        if token is None:
+            return JsonResponse({
+                "detail": "invalid access token"
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
-class MultipleFieldLookupMixin(object):
-    def get_object(self):
-        queryset = self.get_queryset()
-        queryset = self.filter_queryset(queryset)
-        filter = {}
-        for field in self.lookup_fields:
-            filter[field] = self.kwargs[field]
-        return get_object_or_404(queryset, **filter)
+        user_manager_scheme = request.scheme
+        user_manager_port = env("USER_MANAGER_PORT")
+        user_manager_path = request.path
 
+        user_manager_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
+        content_type = request.headers.get("Content-Type")
 
-class FriendDeleteAPI(MultipleFieldLookupMixin, generics.DestroyAPIView):
-    queryset = Friend.objects.all()
-    serializer_class = FriendSerializer
-    lookup_fields = ('from_user', 'to_user')
+        bearer, _, token = token.partition(' ')
+        response = requests.post(
+            user_manager_url,
+            data=request.body,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": content_type
+            }, verify=False
+        )
 
-    http_method_names = ['delete']
+        return HttpResponse(
+            content=response.content,
+            status=response.status_code,
+            headers=response.headers
+        )
+
+    def delete(self, request):
+        token = request.headers.get("Authorization")
+        if token is None:
+            return JsonResponse({
+                "detail": "invalid access token"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        user_manager_scheme = request.scheme
+        user_manager_port = env("USER_MANAGER_PORT")
+        user_manager_path = request.path
+
+        user_manager_url = f"{user_manager_scheme}://{USER_MANAGER_HOST_NAME}:{user_manager_port}{user_manager_path}"
+
+        bearer, _, token = token.partition(' ')
+        response = requests.delete(
+            user_manager_url,
+            headers={"Authorization": f"Bearer {token}"}, verify=False
+        )
+
+        return HttpResponse(
+            content=response.content,
+            status=response.status_code,
+            headers=response.headers
+        )
+
+    http_method_names = ['get', 'patch', 'post', 'delete', 'options']
